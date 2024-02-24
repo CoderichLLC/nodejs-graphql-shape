@@ -1,0 +1,31 @@
+{
+  "name": "@coderich/graphql-shape",
+  "main": "index.js",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "!__mocks__"
+  ],
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ./",
+    "dev": "coderich-dev",
+    "start": "nodemon ./src/Server.js -e js"
+  },
+  "dependencies": {
+    "@coderich/util": "0.1.13",
+    "jsonpath-plus": "^8.0.0",
+    "lodash.get": "4.4.2"
+  },
+  "devDependencies": {
+    "@coderich/dev": "^0.1.0",
+    "graphql": "16.8.1",
+    "lodash.clonedeep": "4.5.0"
+  },
+  "peerDependencies": {
+    "graphql": "*"
+  }
+}
