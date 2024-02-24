@@ -15,7 +15,7 @@
     "dev": "coderich-dev"
   },
   "dependencies": {
-    "@coderich/util": "0.1.15",
+    "@coderich/util": "0.1.16",
     "jsonpath-plus": "^8.0.0"
   },
   "devDependencies": {

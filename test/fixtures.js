@@ -17,10 +17,10 @@ module.exports = {
           }
         }
       }
-      result2: findIt @shape(path: "$[arrObj]") {
+      result2: findIt @shape(path: "edges[*].node.location") {
         id
         arr
-        arrObj @shape(path: "$[*].name") {
+        arrObj @shape(path: "$[*].name", join: ", ") {
           name
         }
         edges {
@@ -115,7 +115,7 @@ module.exports = {
     result2: {
       id: 2,
       arr: ['one', 'two', 'three'],
-      arrObj: [{ name: 'one' }, { name: 'two' }, { name: 'three' }],
+      arrObj: null,
       str: 'five,six,seven,eight',
       edges: [
         {

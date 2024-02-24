@@ -17,6 +17,7 @@ class GraphQLShape {
     const fragments = {};
     let target = transforms, isFragment = false, counter = 0;
 
+    // Parse out directives while building transforms
     const query = print(visit(ast, {
       enter: (node) => {
         const name = node.name?.value;
@@ -98,26 +99,43 @@ class GraphQLShape {
       },
     }));
 
+    // Finalizations due to unpredictable order for AST
     thunks.forEach(thunk => thunk());
-    return { query, transforms: transforms.reverse(), fragments };
+
+    // Preprocess transforms meta-data (for better performance)
+    transforms.reverse().forEach((transform) => {
+      if (transform.map) {
+        transform.map = Util.ensureArray(transform.map).map((mix) => {
+          const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
+          return { name, args: args.split(',').map(el => el.trim()) };
+        });
+      }
+    });
+
+    return { query, transforms, fragments };
   }
 
   static transform(data, transforms = []) {
+    const hoisted = [];
+
     // Apply transformations (in place)
     transforms.forEach(({ key, path = '$', ...rest }) => {
-      Util.pathmap(key, data, (json) => {
+      Util.pathmap(key, data, (json, info) => {
         let value = JSONPath({ path, json, wrap: false });
 
         // Apply the rest (in the order they are defined!)
-        if (value !== null) {
+        if (value != null) {
           Object.entries(rest).forEach(([fn, mixed]) => {
             switch (fn) {
               case 'map': {
-                Util.map(mixed, (mix) => {
-                  const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
-                  const $args = args.split(',').map(el => el.trim());
-                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, name, $args));
+                Util.map(mixed, ({ name, args }) => {
+                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, name, args));
                 });
+                break;
+              }
+              case 'hoist': {
+                if (!mixed) hoisted.push(info);
+                Object.assign(info.parent, value);
                 break;
               }
               default: {
@@ -133,6 +151,9 @@ class GraphQLShape {
       });
     });
 
+    // Delete any hoisted keys
+    hoisted.forEach(({ key, parent }) => delete parent[key]);
+
     return data; // For convenience (and testing)
   }
 
@@ -144,6 +165,8 @@ class GraphQLShape {
   static #resolveNodeValue(node) {
     switch (node.kind) {
       case 'NullValue': return null;
+      case 'IntValue': return parseInt(node.value, 10);
+      case 'StringValue': return `${node.value}`;
       case 'ListValue': return node.values.map(GraphQLShape.#resolveNodeValue);
       case 'EnumValueDefinition': return node.name.value;
       case 'EnumTypeDefinition': return node.values.map(GraphQLShape.#resolveNodeValue);
