@@ -1,6 +1,9 @@
+const Util = require('@coderich/util');
 const cloneDeep = require('lodash.clonedeep');
 const GraphQLShape = require('../src/GraphQLShape');
 const data = require('./data');
+
+GraphQLShape.define('ucFirst', Util.ucFirst);
 
 describe('GraphQLShape', () => {
   describe('transform', () => {
@@ -34,7 +37,7 @@ describe('GraphQLShape', () => {
       fragment frag on Location {
         address {
           city
-          state @shape(toUpperCase: null)
+          state @shape(map: "toUpperCase")
           zip: zipcode
         }
       }
@@ -42,14 +45,14 @@ describe('GraphQLShape', () => {
         result1: findIt {
           id
           arr
-          cats: arrObj @shape(path: "$[*].name", each: "toUpperCase", join: ",") {
+          cats: arrObj @shape(path: "$[*].name", map: "ucFirst", join: ",") {
             name
           }
-          str @shape(split: ",", each: ["toUpperCase"], slice: [0, -1])
+          str @shape(split: ",", map: ["toUpperCase"], slice: [0, -1])
           edges @shape(path: "$[*].node") {
             node {
               id
-              location {
+              location @shape(map: "values", at: "0") {
                 ...frag
               }
             }
@@ -113,18 +116,19 @@ describe('GraphQLShape', () => {
     `.replace(/\s+/g, ''));
 
     expect(transforms).toEqual([
-      { key: 'result1.cats', path: '$[*].name', each: 'toUpperCase', join: ',' },
-      { key: 'result1.str', split: ',', each: ['toUpperCase'], slice: ['0', '-1'] },
+      { key: 'result1.cats', path: '$[*].name', map: 'ucFirst', join: ',' },
+      { key: 'result1.str', split: ',', map: ['toUpperCase'], slice: ['0', '-1'] },
       { key: 'result1.edges', path: '$[*].node' },
-      { key: 'result1.edges.node.location.address.state', toUpperCase: null },
+      { key: 'result1.edges.node.location', map: 'values', at: '0' },
+      { key: 'result1.edges.node.location.address.state', map: 'toUpperCase' },
       { key: 'result2', path: '$[arrObj]' },
       { key: 'result2.arrObj', path: '$[*].name' },
-      { key: 'result2.edges.node.location.address.state', toUpperCase: null },
+      { key: 'result2.edges.node.location.address.state', map: 'toUpperCase' },
     ].reverse());
 
     expect(fragments).toEqual({
       frag: [
-        { key: 'address.state', toUpperCase: null },
+        { key: 'address.state', map: 'toUpperCase' },
       ],
     });
 
@@ -132,27 +136,23 @@ describe('GraphQLShape', () => {
       result1: expect.arrayContaining([{
         id: 1,
         arr: ['one', 'two', 'three'],
-        cats: 'ONE,TWO,THREE',
+        cats: 'One,Two,Three',
         str: ['FIVE', 'SIX', 'SEVEN'], // last one sliced off
         edges: [
           {
             id: 1,
             location: {
-              address: {
-                city: 'city1',
-                state: 'STATE1',
-                zipcode: 'zipcode1',
-              },
+              city: 'city1',
+              state: 'STATE1',
+              zipcode: 'zipcode1',
             },
           },
           {
             id: 2,
             location: {
-              address: {
-                city: 'city2',
-                state: 'STATE2',
-                zipcode: 'zipcode2',
-              },
+              city: 'city2',
+              state: 'STATE2',
+              zipcode: 'zipcode2',
             },
           },
         ],

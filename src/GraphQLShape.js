@@ -115,14 +115,16 @@ class GraphQLShape {
         if (value !== null) {
           Object.entries(rest).forEach(([fn, mixed]) => {
             switch (fn) {
-              case 'each': {
+              case 'map': {
                 Util.map(mixed, (mix) => {
-                  value = Util.map(value, v => v[mix]());
+                  const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
+                  const $args = args.split(',').map(el => el.trim());
+                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, name, ...$args));
                 });
                 break;
               }
               default: {
-                value = value[fn](...mixed || []);
+                value = GraphQLShape.#resolveValueFunction(value, fn, ...mixed);
                 break;
               }
             }
@@ -134,7 +136,11 @@ class GraphQLShape {
       });
     });
 
-    return data; // For convenience
+    return data; // For convenience (and testing)
+  }
+
+  static #resolveValueFunction(v, fn, ...args) {
+    return Object.prototype.hasOwnProperty.call(GraphQLShape.functions, fn) ? GraphQLShape.functions[fn](v, ...args) : v[fn](...args);
   }
 
   static #resolveNodeValue(node) {
@@ -149,6 +155,11 @@ class GraphQLShape {
   }
 }
 
-GraphQLShape.functions = {};
+GraphQLShape.functions = {
+  keys: v => Object.keys(v),
+  values: v => Object.values(v),
+  entries: v => Object.entries(v),
+  fromEntries: v => Object.fromEntries(v),
+};
 
 module.exports = GraphQLShape;
