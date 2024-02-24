@@ -10,24 +10,28 @@ describe('GraphQLShape', () => {
     expect(GraphQLShape.transform(cloneDeep(data), [
       { key: 'result1.cats', path: '$[*].name' },
     ])).toMatchObject({
-      result1: expect.objectContaining({
-        cats: ['one', 'two', 'three'],
-      }),
+      result1: expect.arrayContaining([
+        expect.objectContaining({
+          cats: ['one', 'two', 'three'],
+        }),
+      ]),
     });
 
     // Select array.name
     expect(GraphQLShape.transform(cloneDeep(data), [
       { key: 'result1.cats', path: '$[*].name', join: ',' },
     ])).toMatchObject({
-      result1: expect.objectContaining({
-        cats: 'one,two,three',
-      }),
+      result1: expect.arrayContaining([
+        expect.objectContaining({
+          cats: 'one,two,three',
+        }),
+      ]),
     });
   });
 
   test('constructor', () => {
-    const { query, transforms } = new GraphQLShape(`
-      fragment address on Location {
+    const { query, transforms, fragments } = new GraphQLShape(`
+      fragment frag on Location {
         address {
           city
           state @shape(toUpperCase: null)
@@ -45,13 +49,13 @@ describe('GraphQLShape', () => {
           edges @shape(path: "$[*].node") {
             node {
               id
-              address {
-                ...address
+              location {
+                ...frag
               }
             }
           }
         }
-        result2: findIt {
+        result2: findIt @shape(path: "$[arrObj]") {
           id
           arr
           arrObj @shape(path: "$[*].name") {
@@ -60,8 +64,8 @@ describe('GraphQLShape', () => {
           edges {
             node {
               id
-              address {
-                ...address
+              location {
+                ...frag
               }
             }
           }
@@ -70,7 +74,7 @@ describe('GraphQLShape', () => {
     `);
 
     expect(query.replace(/\s+/g, '')).toEqual(`
-      fragment address on Location {
+      fragment frag on Location {
         address {
           city
           state
@@ -86,8 +90,8 @@ describe('GraphQLShape', () => {
           edges {
             node {
               id
-              address {
-                ...address
+              location {
+                ...frag
               }
             }
           }
@@ -99,8 +103,8 @@ describe('GraphQLShape', () => {
           edges {
             node {
               id
-              address {
-                ...address
+              location {
+                ...frag
               }
             }
           }
@@ -112,13 +116,20 @@ describe('GraphQLShape', () => {
       { key: 'result1.cats', path: '$[*].name', each: 'toUpperCase', join: ',' },
       { key: 'result1.str', split: ',', each: ['toUpperCase'], slice: ['0', '-1'] },
       { key: 'result1.edges', path: '$[*].node' },
-      // { key: 'one.edges.node.address', path: '$' },
+      { key: 'result1.edges.node.location.address.state', toUpperCase: null },
+      { key: 'result2', path: '$[arrObj]' },
       { key: 'result2.arrObj', path: '$[*].name' },
-      // { key: 'two.edges.node.address', path: '$' },
-    ]);
+      { key: 'result2.edges.node.location.address.state', toUpperCase: null },
+    ].reverse());
 
-    expect(GraphQLShape.transform(cloneDeep(data), transforms)).toMatchObject({
-      result1: {
+    expect(fragments).toEqual({
+      frag: [
+        { key: 'address.state', toUpperCase: null },
+      ],
+    });
+
+    expect(GraphQLShape.transform(cloneDeep(data), transforms)).toEqual({
+      result1: expect.arrayContaining([{
         id: 1,
         arr: ['one', 'two', 'three'],
         cats: 'ONE,TWO,THREE',
@@ -126,25 +137,27 @@ describe('GraphQLShape', () => {
         edges: [
           {
             id: 1,
-            address: {
-              city: 'city1',
-              state: 'state1',
-              zipcode: 'zipcode1',
+            location: {
+              address: {
+                city: 'city1',
+                state: 'STATE1',
+                zipcode: 'zipcode1',
+              },
             },
           },
           {
             id: 2,
-            address: {
-              city: 'city2',
-              state: 'state2',
-              zipcode: 'zipcode2',
+            location: {
+              address: {
+                city: 'city2',
+                state: 'STATE2',
+                zipcode: 'zipcode2',
+              },
             },
           },
         ],
-      },
-      result2: {
-        id: 2,
-      },
+      }]),
+      result2: ['one', 'two', 'three'],
     });
   });
 });

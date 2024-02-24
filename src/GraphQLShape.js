@@ -1,5 +1,4 @@
 const Util = require('@coderich/util');
-const get = require('lodash.get');
 const { JSONPath } = require('jsonpath-plus');
 const { Kind, visit, parse, print } = require('graphql');
 
@@ -14,10 +13,12 @@ class GraphQLShape {
   }
 
   static parse(ast, options) {
+    const thunks = [];
     const paths = [];
+    const fpaths = [];
     const transforms = [];
     const fragments = {};
-    let target = transforms, isFragment = false;
+    let target = transforms, isFragment = false, counter = 0;
 
     const query = print(visit(ast, {
       enter: (node) => {
@@ -25,13 +26,24 @@ class GraphQLShape {
         const alias = node.alias?.value;
 
         switch (node.kind) {
-          case Kind.FRAGMENT_SPREAD: {
-            // console.log(node);
-            break;
-          }
           case Kind.FRAGMENT_DEFINITION: {
             target = fragments[name] = [];
             isFragment = true;
+            break;
+          }
+          case Kind.FRAGMENT_SPREAD: {
+            const $paths = [...paths];
+            const start = transforms.length;
+
+            thunks.push(() => {
+              const fragment = fragments[name];
+              const additions = fragment.map((obj) => {
+                const key = $paths.concat(obj.key.split('.')).join('.');
+                return { ...obj, key };
+              });
+              transforms.splice(start + counter, 0, ...additions);
+              counter += additions.length;
+            });
             break;
           }
           case Kind.DIRECTIVE: {
@@ -42,15 +54,16 @@ class GraphQLShape {
                 return Object.assign(prev, { [key]: value });
               }, {});
 
-              target.push({ ...args, key: paths.join('.') });
+              const $paths = isFragment ? fpaths : paths;
+              target.push({ ...args, key: $paths.join('.') });
             }
             break;
           }
           case Kind.FIELD: {
-            if (!isFragment) {
-              paths.push(alias ?? name);
-              // console.log(JSON.stringify(node, null, 2));
-            }
+            const key = alias ?? name;
+            if (isFragment) fpaths.push(key);
+            else paths.push(key);
+            // if (key === 'state') console.log(isFragment, node);
             break;
           }
           default: {
@@ -75,7 +88,8 @@ class GraphQLShape {
             break;
           }
           case Kind.FIELD: {
-            paths.pop();
+            if (isFragment) fpaths.pop();
+            else paths.pop();
             break;
           }
           default: {
@@ -87,36 +101,37 @@ class GraphQLShape {
       },
     }));
 
-    console.log(transforms);
-    return { query, transforms };
+    thunks.forEach(thunk => thunk());
+    return { query, transforms: transforms.reverse(), fragments };
   }
 
   static transform(data, transforms = []) {
     // Apply transformations (in place)
     transforms.forEach(({ key, path = '$', ...rest }) => {
-      const json = get(data, key);
-      let value = JSONPath({ path, json, wrap: false });
+      Util.pathmap(key, data, (json) => {
+        let value = JSONPath({ path, json, wrap: false });
 
-      // Apply the rest (in the order they are defined)
-      if (value !== null) {
-        Object.entries(rest).forEach(([fn, mixed]) => {
-          switch (fn) {
-            case 'each': {
-              Util.map(mixed, (mix) => {
-                value = Util.map(value, v => v[mix]());
-              });
-              break;
+        // Apply the rest (in the order they are defined)
+        if (value !== null) {
+          Object.entries(rest).forEach(([fn, mixed]) => {
+            switch (fn) {
+              case 'each': {
+                Util.map(mixed, (mix) => {
+                  value = Util.map(value, v => v[mix]());
+                });
+                break;
+              }
+              default: {
+                value = value[fn](...mixed || []);
+                break;
+              }
             }
-            default: {
-              value = value[fn](...mixed);
-              break;
-            }
-          }
-        });
-      }
+          });
+        }
 
-      // Set the value back
-      Util.set(data, key, value);
+        // Set the value back
+        return value;
+      });
     });
 
     return data; // For convenience
