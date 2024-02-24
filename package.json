@@ -1,6 +1,6 @@
 {
   "name": "@coderich/graphql-shape",
-  "main": "index.js",
+  "main": "src/GraphQLShape.js",
   "version": "0.0.0",
   "publishConfig": {
     "access": "public"
@@ -12,8 +12,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint ./",
-    "dev": "coderich-dev",
-    "start": "nodemon ./src/Server.js -e js"
+    "dev": "coderich-dev"
   },
   "dependencies": {
     "@coderich/util": "0.1.15",

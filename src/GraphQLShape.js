@@ -3,16 +3,13 @@ const { JSONPath } = require('jsonpath-plus');
 const { Kind, visit, parse, print } = require('graphql');
 
 class GraphQLShape {
-  constructor(query, options = {}) {
-    options.name ??= 'shape';
-    return GraphQLShape.parse(parse(query), options);
-  }
-
   static define(key, fn) {
     GraphQLShape.functions[key] = fn;
   }
 
-  static parse(ast, options) {
+  static parse(ast, options = {}) {
+    if (typeof ast === 'string') ast = parse(ast);
+    options.name ??= 'shape';
     const thunks = [];
     const paths = [];
     const fpaths = [];
@@ -111,7 +108,7 @@ class GraphQLShape {
       Util.pathmap(key, data, (json) => {
         let value = JSONPath({ path, json, wrap: false });
 
-        // Apply the rest (in the order they are defined)
+        // Apply the rest (in the order they are defined!)
         if (value !== null) {
           Object.entries(rest).forEach(([fn, mixed]) => {
             switch (fn) {
@@ -119,12 +116,12 @@ class GraphQLShape {
                 Util.map(mixed, (mix) => {
                   const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
                   const $args = args.split(',').map(el => el.trim());
-                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, name, ...$args));
+                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, name, $args));
                 });
                 break;
               }
               default: {
-                value = GraphQLShape.#resolveValueFunction(value, fn, ...mixed);
+                value = GraphQLShape.#resolveValueFunction(value, fn, mixed);
                 break;
               }
             }
@@ -140,6 +137,7 @@ class GraphQLShape {
   }
 
   static #resolveValueFunction(v, fn, ...args) {
+    args = args.flat();
     return Object.prototype.hasOwnProperty.call(GraphQLShape.functions, fn) ? GraphQLShape.functions[fn](v, ...args) : v[fn](...args);
   }
 
