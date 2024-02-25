@@ -37,22 +37,23 @@ describe('GraphQLShape', () => {
 
     expect(query.replace(/\s+/g, '')).toEqual($request.replace(/\s+/g, ''));
 
-    // expect(transforms).toEqual([
-    //   { key: 'result1.cats', path: '$[*].name', map: 'ucFirst', join: ', ' },
-    //   { key: 'result1.str', split: ',', map: ['toUpperCase'], slice: [0, -1] },
-    //   { key: 'result1.edges', path: '$[*].node' },
-    //   { key: 'result1.edges.node.location', path: 'address' },
-    //   { key: 'result1.edges.node.location.address.state', map: 'toUpperCase' },
-    //   { key: 'result2', path: 'edges[*].node.location' },
-    //   { key: 'result2.arrObj', path: '$[*].name', join: ', ' },
-    //   { key: 'result2.edges.node.location.address.state', map: 'toUpperCase' },
-    // ].reverse());
+    expect(transforms).toEqual([
+      { key: 'result1.cats', path: '$[*].name', map: [{ name: 'ucFirst', args: [''] }], join: ', ' },
+      { key: 'result1.str', split: ',', map: [{ name: 'toUpperCase', args: [''] }], slice: [0, -1] },
+      { key: 'result1.edges', path: '$[*].node' },
+      { key: 'result1.edges.node.location', path: 'address' },
+      { key: 'result1.edges.node.location.address.state', map: [{ name: 'toUpperCase', args: [''] }] },
+      { key: 'result2', path: 'edges[*].node.location' },
+      { key: 'result2.arrObj', path: '$[*].name', join: ', ' },
+      { key: 'result2.edges.node.location.address.state', map: [{ name: 'toUpperCase', args: [''] }] },
+    ].reverse());
 
-    // expect(fragments).toEqual({
-    //   frag: [
-    //     { key: 'address.state', map: 'toUpperCase' },
-    //   ],
-    // });
+    // Not normalized
+    expect(fragments).toEqual({
+      frag: [
+        { key: 'address.state', map: 'toUpperCase' },
+      ],
+    });
 
     expect(GraphQLShape.transform(cloneDeep(data), transforms)).toEqual({
       result1: expect.arrayContaining([{

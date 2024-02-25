@@ -61,7 +61,6 @@ class GraphQLShape {
             const key = alias ?? name;
             if (isFragment) fpaths.push(key);
             else paths.push(key);
-            // if (key === 'state') console.log(isFragment, node);
             break;
           }
           default: {
@@ -73,9 +72,6 @@ class GraphQLShape {
         const name = node.name?.value;
 
         switch (node.kind) {
-          case Kind.OPERATION_DEFINITION: {
-            break;
-          }
           case Kind.FRAGMENT_DEFINITION: {
             isFragment = false;
             target = transforms;
