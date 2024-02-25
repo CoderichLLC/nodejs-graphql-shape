@@ -17,6 +17,14 @@ describe('JSONPath', () => {
     })).toBeUndefined();
   });
 
+  test('$', () => {
+    expect(JSONPath({
+      path: '$',
+      wrap: false,
+      json: {},
+    })).toEqual({});
+  });
+
   test('array (scalar)', () => {
     expect(JSONPath({
       wrap: false,

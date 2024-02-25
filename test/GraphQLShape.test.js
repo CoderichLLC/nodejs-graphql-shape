@@ -37,6 +37,39 @@ describe('GraphQLShape', () => {
   });
 
   describe('parse (and transform)', () => {
+    test('sibling', () => {
+      const { transform } = GraphQLShape.parse(`
+        query {
+          attr1
+          attr2 @shape(data: "$", path: "attr1")
+        }
+      `);
+      expect(transform({ attr1: 'a', attr2: 'b' })).toEqual({ attr1: 'a', attr2: 'a' });
+    });
+
+    test('pathway', () => {
+      const { transform } = GraphQLShape.parse(`
+        query @shape(path: "blah", join: ":") {
+          id
+          books @shape(path: "$[*].*", join: ":") {
+            price
+            author
+          }
+        }
+      `);
+
+      expect(transform({
+        id: 1,
+        books: [
+          { price: 10, author: 'author1' },
+          { price: 20, author: 'author2' },
+          { price: 30, author: 'author3' },
+        ],
+      })).toEqual({
+        books: ['1:10:author1', '1:20:author2', '1:30:author3'],
+      });
+    });
+
     test('fixture', () => {
       const { query, transforms, fragments } = GraphQLShape.parse(request);
 
@@ -105,3 +138,16 @@ describe('GraphQLShape', () => {
     });
   });
 });
+
+// {
+//   key: 'inheritAddress',
+//   name: 'Address Inheritance',
+//   crud: 'r',
+//   exportRule: {
+//     if: [
+//       { '===': [{ var: 'designation' }, 'site'] },
+//       '',
+//       { if: [{ var: 'inheritAddress' }, 'Inherit', 'Override'] },
+//     ],
+//   },
+// },

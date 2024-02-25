@@ -100,6 +100,12 @@ class GraphQLShape {
 
     // Preprocess transforms meta-data (for better performance)
     transforms.reverse().forEach((transform) => {
+      if (transform.data) {
+        transform.data = transform.data.split('.').map((path, i) => {
+          return path.replace(/\[.*?\$.*?\]/g, `$${i}`);
+        }).join('.');
+      }
+
       if (transform.map) {
         transform.map = Util.ensureArray(transform.map).map((mix) => {
           const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
@@ -108,15 +114,24 @@ class GraphQLShape {
       }
     });
 
-    return { query, transforms, fragments };
+    return {
+      query,
+      fragments,
+      transforms,
+      transform: data => GraphQLShape.transform(data, transforms),
+    };
   }
 
   static transform(data, transforms = []) {
     const hoisted = [];
 
     // Apply transformations (in place)
-    transforms.forEach(({ key, path = '$', ...rest }) => {
+    transforms.forEach(({ key, path = '$', data: d, ...rest }) => {
+      const $json = d ? JSONPath({ path: d, json: data, wrap: false }) : undefined;
+
+      if (path === 'blah') console.log(path, typeof (key));
       Util.pathmap(key, data, (json, info) => {
+        if (d) json = $json;
         let value = JSONPath({ path, json, wrap: false });
 
         // Apply the rest (in the order they are defined!)
