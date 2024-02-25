@@ -44,4 +44,20 @@ describe('JSONPath', () => {
       json: { a: 'a', b: 'b', c: 'c' },
     })).toEqual(['a', 'c']);
   });
+
+  test('select keys', () => {
+    expect(JSONPath({
+      wrap: false,
+      path: '$.*~',
+      json: { a: 'one', b: 'two', c: 'three' },
+    })).toEqual(['a', 'b', 'c']);
+  });
+
+  test('select array index', () => {
+    expect(JSONPath({
+      wrap: false,
+      path: 'arr.1',
+      json: { arr: ['one', 'two', 'three'] },
+    })).toEqual('two');
+  });
 });
