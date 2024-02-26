@@ -16,9 +16,8 @@ describe('GraphQLShape', () => {
         { key: 'result1.cats', path: '$[*].name' },
       ])).toMatchObject({
         result1: expect.arrayContaining([
-          expect.objectContaining({
-            cats: ['one', 'two', 'three'],
-          }),
+          expect.objectContaining({ cats: ['one', 'two', 'three'] }),
+          expect.objectContaining({ cats: ['four', 'five', 'six'] }),
         ]),
       });
     });
@@ -28,9 +27,8 @@ describe('GraphQLShape', () => {
         { key: 'result1.cats', path: '$[*].name', join: ',' },
       ])).toMatchObject({
         result1: expect.arrayContaining([
-          expect.objectContaining({
-            cats: 'one,two,three',
-          }),
+          expect.objectContaining({ cats: 'one,two,three' }),
+          expect.objectContaining({ cats: 'four,five,six' }),
         ]),
       });
     });
@@ -41,17 +39,17 @@ describe('GraphQLShape', () => {
       const { transform } = GraphQLShape.parse(`
         query {
           attr1
-          attr2 @shape(data: "$", path: "attr1")
+          attr2 @shape(get: "attr1")
         }
       `);
       expect(transform({ attr1: 'a', attr2: 'b' })).toEqual({ attr1: 'a', attr2: 'a' });
     });
 
-    test('pathway', () => {
+    test('tricky transform', () => {
       const { transform } = GraphQLShape.parse(`
-        query @shape(path: "blah", join: ":") {
-          id
-          books @shape(path: "$[*].*", join: ":") {
+        query @shape(get: "id") {
+          id @shape(get: "books", map: ["unshift($)", "join(:)"])
+          books @shape(map: values) {
             price
             author
           }
@@ -65,9 +63,20 @@ describe('GraphQLShape', () => {
           { price: 20, author: 'author2' },
           { price: 30, author: 'author3' },
         ],
-      })).toEqual({
-        books: ['1:10:author1', '1:20:author2', '1:30:author3'],
-      });
+      })).toEqual(['1:10:author1', '1:20:author2', '1:30:author3']);
+    });
+
+    test('tricky logic', () => {
+      const { transform } = GraphQLShape.parse(`
+        query {
+          inherit @shape(get: "designation", eq: ["site", "", "$"], eq: [true, "Inherit", "Override"])
+          designation
+        }
+      `);
+
+      expect(transform({ inherit: true, designation: 'poi' })).toEqual({ inherit: 'Inherit', designation: 'poi' });
+      expect(transform({ inherit: false, designation: 'poi' })).toEqual({ inherit: 'Override', designation: 'poi' });
+      expect(transform({ inherit: false, designation: 'site' })).toEqual({ inherit: '', designation: 'site' });
     });
 
     test('fixture', () => {
