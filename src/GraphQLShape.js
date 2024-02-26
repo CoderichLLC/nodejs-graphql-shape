@@ -178,17 +178,17 @@ class GraphQLShape {
 GraphQLShape.functions = ['push', 'pop', 'shift', 'unshift'].reduce((prev, fn) => {
   return Object.assign(prev, {
     [fn]: (v, ...rest) => {
-      v[fn](...rest);
+      v?.[fn]?.(...rest);
       return v;
     },
   });
 }, {
   nvl: Util.nvl,
   uvl: Util.uvl,
-  keys: v => Object.keys(v),
-  values: v => Object.values(v),
-  entries: v => Object.entries(v),
-  fromEntries: v => Object.fromEntries(v),
+  keys: v => (v ? Object.keys(v) : v),
+  values: v => (v ? Object.values(v) : v),
+  entries: v => (v ? Object.entries(v) : v),
+  fromEntries: v => (v ? Object.fromEntries(v) : v),
   eq: (v, ...rest) => {
     return Util.uvl(Util.pairs(rest).reduce((prev, [value, result], i) => {
       if (prev !== undefined) return prev;
