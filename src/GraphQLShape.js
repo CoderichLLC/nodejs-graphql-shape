@@ -46,14 +46,14 @@ class GraphQLShape {
           }
           case Kind.DIRECTIVE: {
             if (name === options.name) {
-              const args = node.arguments.reduce((prev, arg) => {
+              const ops = node.arguments.map((arg) => {
                 const key = arg.name.value;
                 const value = GraphQLShape.#resolveNodeValue(arg.value);
-                return Object.assign(prev, { [key]: value });
-              }, {});
+                return { [key]: value };
+              });
 
               const $paths = isFragment ? fpaths : paths;
-              target.push({ ...args, key: $paths.join('.') });
+              target.push({ key: $paths.join('.'), ops });
             }
             break;
           }
@@ -98,26 +98,10 @@ class GraphQLShape {
     // Finalizations due to unpredictable order for AST
     thunks.forEach(thunk => thunk());
 
-    // Preprocess transforms meta-data (for better performance)
-    transforms.reverse().forEach((transform) => {
-      // if (transform.path) {
-      //   transform.path = transform.path.split('.').map((path, i) => {
-      //     return path.str.replace(/(?<=\[)\$(?=\])/g, 'hi');
-      //   }).join('.');
-      // }
-
-      if (transform.map) {
-        transform.map = Util.ensureArray(transform.map).map((mix) => {
-          const [, name = mix, args = ''] = mix.match(/(\w+)\s*\((.*?)\)|(.*)/);
-          return { name, args: args.split(',').map(el => el.trim()) };
-        });
-      }
-    });
-
     return {
       query,
       fragments,
-      transforms,
+      transforms: transforms.reverse(), // We must reverse the order since we do depth-first traversal
       transform: data => GraphQLShape.transform(data, transforms),
     };
   }
@@ -126,38 +110,38 @@ class GraphQLShape {
     const hoisted = [];
 
     // Apply transformations (in place)
-    transforms.forEach(({ key, path = '$', ...rest }) => {
-      // We assign data here because it's possible to modify the root/data itself
-      data = Util.pathmap(key, data, (json, info) => {
-        let value = Util.isPlainObjectOrArray(json) ? JSONPath({ path, json, wrap: false }) : json;
+    transforms.forEach(({ key, ops = [] }) => {
+      // We assign data here because it's possible to modify the root/data itself (key: '')
+      data = Util.pathmap(key, data, (value, info) => {
         const originalValue = value;
 
-        // Apply the rest (in the order they are defined!)
-        if (value != null) {
-          Object.entries(rest).forEach(([fn, mixed]) => {
-            switch (fn) {
-              case 'get': {
-                value = JSONPath({ path: mixed, json: data, wrap: false });
-                break;
-              }
-              case 'map': {
-                Util.map(mixed, ({ name, args }) => {
-                  value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, originalValue, name, args));
-                });
-                break;
-              }
-              case 'hoist': {
-                if (!mixed) hoisted.push(info);
-                Object.assign(info.parent, value);
-                break;
-              }
-              default: {
-                value = GraphQLShape.#resolveValueFunction(value, originalValue, fn, mixed);
-                break;
-              }
+        ops.forEach((op) => {
+          const [[fn, mixed]] = Object.entries(op);
+
+          switch (fn) {
+            case 'self': case 'parent': case 'root': {
+              const json = [value, info.parent, data][['self', 'parent', 'root'].indexOf(fn)];
+              value = Util.isPlainObjectOrArray(json) ? JSONPath({ path: mixed, json, wrap: false }) : json;
+              break;
             }
-          });
-        }
+            case 'map': {
+              Util.map(mixed, (el) => {
+                const [[fnName, args]] = Object.entries(el);
+                value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, originalValue, fnName, args));
+              });
+              break;
+            }
+            case 'hoist': {
+              if (!mixed) hoisted.push(info);
+              Object.assign(info.parent, value);
+              break;
+            }
+            default: {
+              value = GraphQLShape.#resolveValueFunction(value, originalValue, fn, mixed);
+              break;
+            }
+          }
+        });
 
         // Set the value back
         return value;
@@ -171,8 +155,10 @@ class GraphQLShape {
   }
 
   static #resolveValueFunction(value, originalValue, fn, ...args) {
-    args = Util.ensureArray(args).flat().map(arg => `${arg}`.replace(/\$/, originalValue));
-    return Object.prototype.hasOwnProperty.call(GraphQLShape.functions, fn) ? GraphQLShape.functions[fn](value, ...args) : value[fn](...args);
+    args = Util.ensureArray(args).flat().map(arg => (`${arg}`.match(/\$/) ? originalValue : arg));
+    if (GraphQLShape.functions[fn]) return GraphQLShape.functions[fn](value, ...args);
+    if (value?.[fn]) return value[fn](...args);
+    return value;
   }
 
   static #resolveNodeValue(node) {

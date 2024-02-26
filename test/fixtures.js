@@ -4,23 +4,23 @@ module.exports = {
       result1: findIt {
         id
         arr
-        cats: arrObj @shape(path: "$[*].name", map: "ucFirst", join: ", ") {
+        cats: arrObj @shape(self: "$[*].name", map: { ucFirst: "" }, join: ", ") {
           name
         }
-        str @shape(split: ",", map: ["toUpperCase"], slice: [0, -1])
-        edges @shape(path: "$[*].node") {
+        str @shape(split: ",", map: [{ toUpperCase: "" }], slice: [0, -1])
+        edges @shape(self: "$[*].node") {
           node {
             id
-            location @shape(path: "address") {
+            location @shape(self: "address") {
               ...frag
             }
           }
         }
       }
-      result2: findIt @shape(path: "edges[*].node.location") {
+      result2: findIt @shape(self: "edges[*].node.location") {
         id
         arr
-        arrObj @shape(path: "$[*].name", join: ", ") {
+        arrObj @shape(self: "$[*].name", join: ", ") {
           name
         }
         edges {
@@ -36,7 +36,7 @@ module.exports = {
     fragment frag on Location {
       address {
         city
-        state @shape(map: "toUpperCase")
+        state @shape(map: { toUpperCase: "" })
         zip: zipcode
       }
     }
