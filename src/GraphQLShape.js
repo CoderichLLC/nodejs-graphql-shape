@@ -1,10 +1,11 @@
 const Util = require('@coderich/util');
 const { JSONPath } = require('jsonpath-plus');
 const { Kind, visit, parse, print } = require('graphql');
+const functions = require('./functions');
 
-class GraphQLShape {
+module.exports = class GraphQLShape {
   static define(key, fn) {
-    GraphQLShape.functions[key] = fn;
+    functions[key] = fn;
   }
 
   static parse(ast, options = {}) {
@@ -113,7 +114,7 @@ class GraphQLShape {
     transforms.forEach(({ key, ops = [] }) => {
       // We assign data here because it's possible to modify the root/data itself (key: '')
       data = Util.pathmap(key, data, (value, info) => {
-        const originalValue = value;
+        const values = [value];
 
         ops.forEach((op) => {
           const [[fn, mixed]] = Object.entries(op);
@@ -127,7 +128,7 @@ class GraphQLShape {
             case 'map': {
               Util.map(mixed, (el) => {
                 const [[fnName, args]] = Object.entries(el);
-                value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, originalValue, fnName, args));
+                value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
               });
               break;
             }
@@ -137,10 +138,12 @@ class GraphQLShape {
               break;
             }
             default: {
-              value = GraphQLShape.#resolveValueFunction(value, originalValue, fn, mixed);
+              value = GraphQLShape.#resolveValueFunction(value, values, fn, mixed);
               break;
             }
           }
+
+          values.push(value);
         });
 
         // Set the value back
@@ -154,9 +157,14 @@ class GraphQLShape {
     return data; // For convenience (and testing)
   }
 
-  static #resolveValueFunction(value, originalValue, fn, ...args) {
-    args = Util.ensureArray(args).flat().map(arg => (`${arg}`.match(/\$/) ? originalValue : arg));
-    if (GraphQLShape.functions[fn]) return GraphQLShape.functions[fn](value, ...args);
+  static #resolveValueFunction(value, values, fn, ...args) {
+    const [lib, method] = fn.split('_');
+    args = Util.ensureArray(args).flat().map((arg) => {
+      const match = `${arg}`.match(/\$(\d)/);
+      return match ? values[match[1]] : arg;
+    });
+    if (method && global[lib]) return global[lib][method].call(null, value, ...args);
+    if (functions[fn]) return functions[fn](value, ...args);
     if (value?.[fn]) return value[fn](...args);
     return value;
   }
@@ -173,30 +181,4 @@ class GraphQLShape {
       default: return node.value ?? node;
     }
   }
-}
-
-GraphQLShape.functions = ['push', 'pop', 'shift', 'unshift'].reduce((prev, fn) => {
-  return Object.assign(prev, {
-    [fn]: (v, ...rest) => {
-      v?.[fn]?.(...rest);
-      return v;
-    },
-  });
-}, {
-  nvl: Util.nvl,
-  uvl: Util.uvl,
-  keys: v => (v ? Object.keys(v) : v),
-  values: v => (v ? Object.values(v) : v),
-  entries: v => (v ? Object.entries(v) : v),
-  fromEntries: v => (v ? Object.fromEntries(v) : v),
-  eq: (v, ...rest) => {
-    return Util.uvl(Util.pairs(rest).reduce((prev, [value, result], i) => {
-      if (prev !== undefined) return prev;
-      if (prev === undefined && result === undefined && i > 0) return value;
-      if (v === value) return result;
-      return undefined;
-    }, undefined), v);
-  },
-});
-
-module.exports = GraphQLShape;
+};

@@ -39,7 +39,13 @@ describe('GraphQLShape', () => {
       ])).toEqual({ attr1: 'a', attr2: 'a' });
     });
 
-    test('tricky transform', () => {
+    test('eq (boolean)', () => {
+      expect(GraphQLShape.transform({ attr1: 'one', attr2: 'two' }, [
+        { key: 'attr2', ops: [{ parent: 'attr1' }, { eq: 'two' }] },
+      ])).toEqual({ attr1: 'one', attr2: false });
+    });
+
+    test('transformation rollup', () => {
       expect(GraphQLShape.transform({
         id: 1,
         books: [
@@ -48,19 +54,19 @@ describe('GraphQLShape', () => {
           { price: 30, author: 'author3' },
         ],
       }, [
-        { key: 'books', ops: [{ map: { values: '' } }] },
-        { key: 'id', ops: [{ parent: 'books' }, { map: [{ unshift: '$' }, { join: ':' }] }] },
+        { key: 'books', ops: [{ map: { Object_values: '' } }] },
+        { key: 'id', ops: [{ parent: 'books' }, { map: [{ unshift: '$0' }, { join: ':' }] }] },
         { key: '', ops: [{ self: 'id' }] },
       ])).toEqual(['1:10:author1', '1:20:author2', '1:30:author3']);
     });
 
-    test('tricky logic', () => {
+    test('logic1', () => {
       const transforms = [
         {
           key: 'inherit',
           ops: [
             { parent: 'designation' },
-            { eq: ['site', '', '$'] },
+            { eq: ['site', '', '$0'] },
             { eq: ['', '', true, 'Inherit', 'Override'] },
           ],
         },
@@ -68,6 +74,23 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ inherit: true, designation: 'poi' }, transforms)).toEqual({ inherit: 'Inherit', designation: 'poi' });
       expect(GraphQLShape.transform({ inherit: false, designation: 'poi' }, transforms)).toEqual({ inherit: 'Override', designation: 'poi' });
       expect(GraphQLShape.transform({ inherit: false, designation: 'site' }, transforms)).toEqual({ inherit: '', designation: 'site' });
+    });
+
+    test('logic2', () => {
+      const transforms = [
+        {
+          key: 'obj.name',
+          ops: [
+            { parent: 'lever' },
+            { in: ['a', 'b', 'c'] },
+            { eq: [true, '$0', '$1'] },
+          ],
+        },
+      ];
+      expect(GraphQLShape.transform({ obj: { lever: 'a', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'a', name: 'name' } });
+      expect(GraphQLShape.transform({ obj: { lever: 'b', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'b', name: 'name' } });
+      expect(GraphQLShape.transform({ obj: { lever: 'c', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'c', name: 'name' } });
+      expect(GraphQLShape.transform({ obj: { lever: 'd', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'd', name: 'd' } });
     });
   });
 
@@ -82,11 +105,11 @@ describe('GraphQLShape', () => {
       expect(transform({ attr1: 'a', attr2: 'b' })).toEqual({ attr1: 'a', attr2: 'a' });
     });
 
-    test('tricky transform', () => {
+    test('transformation rollup', () => {
       const { transform } = GraphQLShape.parse(`
         query @shape(self: "id") {
-          id @shape(parent: "books", map: [{ unshift: "$" }, { join: ":" }])
-          books @shape(map: { values: "" }) {
+          id @shape(parent: "books", map: [{ unshift: "$0" }, { join: ":" }])
+          books @shape(map: { Object_values: "" }) {
             price
             author
           }
@@ -103,10 +126,10 @@ describe('GraphQLShape', () => {
       })).toEqual(['1:10:author1', '1:20:author2', '1:30:author3']);
     });
 
-    test('tricky logic', () => {
+    test('cond logic', () => {
       const { transform } = GraphQLShape.parse(`
         query {
-          inherit @shape(parent: "designation", eq: ["site", "", "$"], eq: ["", "", true, "Inherit", "Override"])
+          inherit @shape(parent: "designation", eq: ["site", "", "$0"], eq: ["", "", true, "Inherit", "Override"])
           designation
         }
       `);
