@@ -44,4 +44,7 @@ exports.mod = (v, ...rest) => rest.reduce((prev, curr) => prev % curr, v);
 // Utility methods
 exports.nvl = Util.nvl;
 exports.uvl = Util.uvl;
+exports.pairs = Util.pairs;
 exports.pushIt = Util.push;
+exports.flatten = Util.flatten;
+exports.unflatten = Util.unflatten;

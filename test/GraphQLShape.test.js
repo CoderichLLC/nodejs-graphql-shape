@@ -45,6 +45,23 @@ describe('GraphQLShape', () => {
       ])).toEqual({ attr1: 'one', attr2: false });
     });
 
+    test('core methods', () => {
+      expect(GraphQLShape.transform({ attr1: 'one', attr2: 'two', attr3: 'three' }, [
+        { key: 'attr1', ops: [{ Boolean: null }] },
+        { key: 'attr2', ops: [{ Date: 'now' }] },
+        { key: 'attr3', ops: [{ Date: 'new' }] },
+      ])).toEqual({ attr1: true, attr2: expect.any(Number), attr3: expect.any(Date) });
+    });
+
+    test('flatten', () => {
+      expect(GraphQLShape.transform({
+        a: 'a',
+        arr: [{ a: 'a', b: 'b' }, { c: 'c' }, { d: 'd' }],
+      }, [
+        { key: '', ops: [{ flatten: '' }] },
+      ])).toEqual({ a: 'a', 'arr.0.a': 'a', 'arr.0.b': 'b', 'arr.1.c': 'c', 'arr.2.d': 'd' });
+    });
+
     test('transformation rollup', () => {
       expect(GraphQLShape.transform({
         id: 1,
@@ -54,7 +71,7 @@ describe('GraphQLShape', () => {
           { price: 30, author: 'author3' },
         ],
       }, [
-        { key: 'books', ops: [{ map: { Object_values: '' } }] },
+        { key: 'books', ops: [{ map: { Object: 'values' } }] },
         { key: 'id', ops: [{ parent: 'books' }, { map: [{ unshift: '$0' }, { join: ':' }] }] },
         { key: '', ops: [{ self: 'id' }] },
       ])).toEqual(['1:10:author1', '1:20:author2', '1:30:author3']);
@@ -109,7 +126,7 @@ describe('GraphQLShape', () => {
       const { transform } = GraphQLShape.parse(`
         query @shape(self: "id") {
           id @shape(parent: "books", map: [{ unshift: "$0" }, { join: ":" }])
-          books @shape(map: { Object_values: "" }) {
+          books @shape(map: { Object: values }) {
             price
             author
           }

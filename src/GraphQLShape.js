@@ -2,6 +2,7 @@ const Util = require('@coderich/util');
 const { JSONPath } = require('jsonpath-plus');
 const { Kind, visit, parse, print } = require('graphql');
 const functions = require('./functions');
+const core = require('./core');
 
 module.exports = class GraphQLShape {
   static define(key, fn) {
@@ -158,12 +159,20 @@ module.exports = class GraphQLShape {
   }
 
   static #resolveValueFunction(value, values, fn, ...args) {
-    const [lib, method] = fn.split('_');
+    // Argument replacement variables
     args = Util.ensureArray(args).flat().map((arg) => {
       const match = `${arg}`.match(/\$(\d)/);
       return match ? values[match[1]] : arg;
     });
-    if (method && global[lib]) return global[lib][method].call(null, value, ...args);
+
+    // Core functions have a special syntax
+    if (core[fn]) {
+      const method = args.shift();
+      if (method === 'new') return new core[fn](value, ...args);
+      if (method === null) return core[fn](value, ...args);
+      return core[fn][method](value, ...args);
+    }
+
     if (functions[fn]) return functions[fn](value, ...args);
     if (value?.[fn]) return value[fn](...args);
     return value;
