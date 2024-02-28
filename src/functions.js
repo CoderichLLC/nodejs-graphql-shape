@@ -1,3 +1,4 @@
+const get = require('lodash.get');
 const Util = require('@coderich/util');
 
 // Array methods
@@ -42,9 +43,12 @@ exports.mul = (v, ...rest) => rest.reduce((prev, curr) => prev * curr, v);
 exports.mod = (v, ...rest) => rest.reduce((prev, curr) => prev % curr, v);
 
 // Utility methods
+exports.get = get;
+exports.set = Util.set;
 exports.nvl = Util.nvl;
 exports.uvl = Util.uvl;
 exports.pairs = Util.pairs;
 exports.pushIt = Util.push;
 exports.flatten = Util.flatten;
 exports.unflatten = Util.unflatten;
+exports.pick = (v, ...rest) => rest.flat().reduce((prev, key) => Object.assign(prev, { [key]: v[key] }), {});

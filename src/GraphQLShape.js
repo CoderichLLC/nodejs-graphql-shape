@@ -17,7 +17,8 @@ module.exports = class GraphQLShape {
     const fpaths = [];
     const transforms = [];
     const fragments = {};
-    let target = transforms, isFragment = false, counter = 0;
+    const deleteNodes = new WeakMap();
+    let target = transforms, isFragment = false, counter = 0, field;
 
     // Parse out directives while building transforms
     const query = print(visit(ast, {
@@ -47,12 +48,13 @@ module.exports = class GraphQLShape {
             break;
           }
           case Kind.DIRECTIVE: {
-            if (name === options.name) {
+            if ([options.name, `_${options.name}`].includes(name)) {
               const ops = node.arguments.map((arg) => {
                 const key = arg.name.value;
                 const value = GraphQLShape.#resolveNodeValue(arg.value);
+                if (name === `_${options.name}`) deleteNodes.set(field.name, false);
                 return { [key]: value };
-              });
+              }).filter(Boolean);
 
               const $paths = isFragment ? fpaths : paths;
               target.push({ key: $paths.join('.'), ops });
@@ -63,6 +65,7 @@ module.exports = class GraphQLShape {
             const key = alias ?? name;
             if (isFragment) fpaths.push(key);
             else paths.push(key);
+            field = node;
             break;
           }
           default: {
@@ -86,6 +89,7 @@ module.exports = class GraphQLShape {
           case Kind.FIELD: {
             if (isFragment) fpaths.pop();
             else paths.pop();
+            if (deleteNodes.has(node.name)) return null;
             break;
           }
           default: {
@@ -109,10 +113,10 @@ module.exports = class GraphQLShape {
   }
 
   static transform(data, transforms = []) {
-    const hoisted = [];
-
     // Apply transformations (in place)
     transforms.forEach(({ key, ops = [] }) => {
+      const hoisted = [];
+
       // We assign data here because it's possible to modify the root/data itself (key: '')
       data = Util.pathmap(key, data, (value, info) => {
         const values = [value];
@@ -123,13 +127,23 @@ module.exports = class GraphQLShape {
           switch (fn) {
             case 'self': case 'parent': case 'root': {
               const json = [value, info.parent, data][['self', 'parent', 'root'].indexOf(fn)];
-              value = Util.isPlainObjectOrArray(json) ? JSONPath({ path: mixed, json, wrap: false }) : json;
+
+              try {
+                value = Util.isPlainObjectOrArray(json) ? JSONPath({ path: mixed, json, wrap: false }) : json;
+              } catch (e) {
+                e.data = { json, mixed };
+                console.log(json);
+                console.log(mixed);
+                throw e;
+              }
+
               break;
             }
             case 'map': {
               Util.map(mixed, (el) => {
                 const [[fnName, args]] = Object.entries(el);
                 value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
+                // value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
               });
               break;
             }
@@ -150,10 +164,10 @@ module.exports = class GraphQLShape {
         // Set the value back
         return value;
       });
-    });
 
-    // Delete any hoisted keys
-    hoisted.forEach(({ key, parent }) => delete parent[key]);
+      // Delete any hoisted keys
+      hoisted.forEach(hoist => delete hoist.parent[hoist.key]);
+    });
 
     return data; // For convenience (and testing)
   }

@@ -53,6 +53,38 @@ describe('GraphQLShape', () => {
       ])).toEqual({ attr1: true, attr2: expect.any(Number), attr3: expect.any(Date) });
     });
 
+    test('pick', () => {
+      expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
+        { key: 'base', ops: [{ pick: ['attr2', 'attr3'] }] },
+      ])).toEqual({ base: { attr2: 'two', attr3: 'three' } });
+    });
+
+    test('array manipulation', () => {
+      expect(GraphQLShape.transform({
+        arrObj: [
+          { type: 'phone', data: { phone: '973', url: 'tel:973' } },
+          { type: 'ignore', data: { url: { en: 'ignore' } } },
+          { type: 'website', data: { url: { en: 'google' } } },
+        ],
+      }, [
+        { key: 'phone', ops: [{ parent: 'arrObj[?(@.type=="phone")].data.phone' }, { self: '$[0]' }] },
+        { key: 'website', ops: [{ parent: 'arrObj[?(@.type=="website")].data.url.en' }, { self: '$[0]' }] },
+        { key: '', ops: [{ pick: ['phone', 'website'] }] },
+
+      ])).toEqual({ phone: '973', website: 'google' });
+    });
+
+    test('adhoc attributes', () => {
+      expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
+        { key: 'base', ops: [{ pick: ['attr2', 'attr3'] }] },
+        { key: 'base.attr4', ops: [{ parent: 'attr2' }] },
+        { key: 'adhoc', ops: [{ parent: 'base' }] },
+      ])).toEqual({
+        base: { attr2: 'two', attr3: 'three', attr4: 'two' },
+        adhoc: { attr2: 'two', attr3: 'three', attr4: 'two' },
+      });
+    });
+
     test('flatten', () => {
       expect(GraphQLShape.transform({
         a: 'a',

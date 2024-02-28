@@ -15,8 +15,9 @@
     "dev": "coderich-dev"
   },
   "dependencies": {
-    "@coderich/util": "0.1.16",
-    "jsonpath-plus": "^8.0.0"
+    "@coderich/util": "0.1.17",
+    "jsonpath-plus": "^8.0.0",
+    "lodash.get": "4.4.2"
   },
   "devDependencies": {
     "@coderich/dev": "^0.1.0",
