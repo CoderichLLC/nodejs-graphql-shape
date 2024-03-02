@@ -28,7 +28,7 @@ By default, the directive name is `shape` and may be configured via `options.nam
 directive | usage | .parse()
 --- | --- | ---
 `@shape` | Define transformations on an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
-`@_shape` | Define transformations on a **non-existing** fields in the GraphQL Schema | The *field* is removed from the *query*
+`@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (Pipeline)
 Transformations are specified as a series of directive parameters on each field and adhere to the following rules:
@@ -38,6 +38,8 @@ Transformations are specified as a series of directive parameters on each field 
 ### Example (Kitchen Sink)
 ```graphql
 query {
-    hello @shape()
+    books {
+
+    }
 }
 ```
