@@ -54,9 +54,20 @@ describe('GraphQLShape', () => {
     });
 
     test('pick', () => {
+      // Via string
       expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
         { key: 'base', ops: [{ pick: ['attr2', 'attr3'] }] },
       ])).toEqual({ base: { attr2: 'two', attr3: 'three' } });
+
+      // Via array
+      expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
+        { key: 'base', ops: [{ pick: [['attr2', 'attr'], 'attr3'] }] },
+      ])).toEqual({ base: { attr: 'two', attr3: 'three' } });
+
+      // Via object
+      expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
+        { key: 'base', ops: [{ pick: [{ attr1: 'attr' }, 'attr3'] }] },
+      ])).toEqual({ base: { attr: 'one', attr3: 'three' } });
     });
 
     test('array manipulation', () => {
@@ -140,6 +151,21 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ obj: { lever: 'b', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'b', name: 'name' } });
       expect(GraphQLShape.transform({ obj: { lever: 'c', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'c', name: 'name' } });
       expect(GraphQLShape.transform({ obj: { lever: 'd', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'd', name: 'd' } });
+    });
+
+    test('assign', () => {
+      const transforms1 = [{ key: 'obj', ops: [{ self: 'a' }] }];
+      const transforms2 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: 'b' }] }];
+      const transforms3 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: '$0' }] }];
+      const transforms4 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: '$1' }] }];
+      const transforms5 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: '$2' }] }];
+      const transforms6 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: ['$0', '$1', 'a', { b: 'c' }] }] }];
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms1)).toEqual({ obj: 'a' }); // Sanity test
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms2)).toEqual({ obj: 'b' });
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms3)).toEqual({ obj: { a: 'a' } });
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms4)).toEqual({ obj: 'a' });
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms5)).toEqual({ obj: undefined });
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms6)).toEqual({ obj: [{ a: 'a' }, 'a', 'a', { b: 'c' }] });
     });
   });
 

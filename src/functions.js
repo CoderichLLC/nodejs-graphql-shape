@@ -51,4 +51,10 @@ exports.pairs = Util.pairs;
 exports.pushIt = Util.push;
 exports.flatten = Util.flatten;
 exports.unflatten = Util.unflatten;
-exports.pick = (v, ...rest) => rest.flat().reduce((prev, key) => Object.assign(prev, { [key]: v[key] }), {});
+exports.pick = (v, ...rest) => rest.reduce((prev, mixed) => {
+  let key, $key;
+  if (Array.isArray(mixed)) [key, $key] = mixed;
+  else if (typeof mixed === 'object') [[key, $key]] = Object.entries(mixed);
+  else key = $key = mixed;
+  return Object.assign(prev, { [$key]: v[key] });
+}, {});

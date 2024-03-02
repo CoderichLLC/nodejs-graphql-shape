@@ -119,7 +119,7 @@ module.exports = class GraphQLShape {
 
       // We assign data here because it's possible to modify the root/data itself (key: '')
       data = Util.pathmap(key, data, (value, info) => {
-        const values = [value];
+        const vars = [value];
 
         ops.forEach((op) => {
           const [[fn, mixed]] = Object.entries(op);
@@ -140,8 +140,12 @@ module.exports = class GraphQLShape {
             case 'map': {
               Util.map(mixed, (el) => {
                 const [[fnName, args]] = Object.entries(el);
-                value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
+                value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, vars, fnName, args));
               });
+              break;
+            }
+            case 'assign': {
+              value = GraphQLShape.#resolveVariableArgs(vars, mixed);
               break;
             }
             case 'hoist': {
@@ -150,12 +154,12 @@ module.exports = class GraphQLShape {
               break;
             }
             default: {
-              value = GraphQLShape.#resolveValueFunction(value, values, fn, mixed);
+              value = GraphQLShape.#resolveValueFunction(value, vars, fn, mixed);
               break;
             }
           }
 
-          values.push(value);
+          vars.push(value);
         });
 
         // Set the value back
@@ -169,12 +173,16 @@ module.exports = class GraphQLShape {
     return data; // For convenience (and testing)
   }
 
-  static #resolveValueFunction(value, values, fn, ...args) {
-    // Argument replacement variables
-    args = Util.ensureArray(args).flat().map((arg) => {
+  static #resolveVariableArgs(vars, args) {
+    return Util.map(args, (arg) => {
       const match = `${arg}`.match(/\$(\d)/);
-      return match ? values[match[1]] : arg;
+      return match ? vars[match[1]] : arg;
     });
+  }
+
+  static #resolveValueFunction(value, vars, fn, ...args) {
+    // Argument replacement variables
+    args = GraphQLShape.#resolveVariableArgs(vars, args.flat());
 
     // Core functions have a special syntax
     if (core[fn]) {
