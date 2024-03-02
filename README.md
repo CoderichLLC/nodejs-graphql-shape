@@ -38,8 +38,16 @@ Transformations are specified as a series of directive parameters on each field 
 ### Example (Kitchen Sink)
 ```graphql
 query {
-    books {
-
+  books {
+    edges {
+      node {
+        isbn
+        title
+        author {
+          name
+        }
+      }
     }
+  }
 }
 ```
