@@ -19,7 +19,7 @@ It leverages [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to 
 const { parse } = require('@coderich/graphql-shape');
 
 const { query, transform } = parse(annotatedQuery, [options]);
-const data = await graphqlClient.request(query, args);
+const data = await graphqlClient.request(query, args); // Your own client
 const shaped = transform(data);
 ```
 
@@ -33,7 +33,7 @@ directive | usage | .parse()
 ### Transformations (Pipeline)
 Transformations are specified as a series of directive parameters on each field and adhere to the following rules:
 * Transformations are applied depth-first (inside-out) and from left-to-right
-* Each transformation receives the value from the previous creating a pipeline
+* Each transformation receives the value from the previous; creating a pipeline
 
 ### Example (Kitchen Sink)
 ```graphql
