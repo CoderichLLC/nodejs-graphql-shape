@@ -3,9 +3,10 @@
 [![Build Status](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml/badge.svg)](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml)
 
 Shape the response of your GraphQL queries, **declaratively!**
-This project explores the concept of Query and Transformation Collocation in **GraphQL**.
-It utilizes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help extract and transform data to any shape!
 
+This project explores the concept of Query and Transformation Collocation in **GraphQL**.
+
+It utilizes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help extract and transform data to any shape!
 
 ---
 
