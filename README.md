@@ -1,10 +1,11 @@
 # GraphQLShape
 
-> Shape the response of your GraphQL queries, **declaratively!**
+[![Build Status](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml/badge.svg)](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml)
+
+Shape the response of your GraphQL queries, **declaratively!**
 This project explores the concept of Query and Transformation Collocation in **GraphQL**.
 It utilizes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help extract and transform data to any shape!
 
-[![Build Status](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml/badge.svg)](https://github.com/CoderichLLC/nodejs-graphql-shape/actions/workflows/publish.yml)
 
 ---
 
@@ -36,6 +37,6 @@ Transformations are specified as a series of directive parameters on each field 
 ### Example (Kitchen Sink)
 ```graphql
 query {
-    hello
+    hello @shape()
 }
 ```
