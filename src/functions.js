@@ -36,11 +36,11 @@ exports.and = (...args) => args.flat().every(el => el);
 exports.or = (...args) => args.flat().some(el => el);
 
 // Math
-exports.add = (v, ...rest) => rest.reduce((prev, curr) => prev + curr, v);
-exports.sub = (v, ...rest) => rest.reduce((prev, curr) => prev - curr, v);
-exports.div = (v, ...rest) => rest.reduce((prev, curr) => prev / curr, v);
-exports.mul = (v, ...rest) => rest.reduce((prev, curr) => prev * curr, v);
-exports.mod = (v, ...rest) => rest.reduce((prev, curr) => prev % curr, v);
+exports.add = (v, ...rest) => rest.flat().reduce((prev, curr) => prev + curr, v);
+exports.sub = (v, ...rest) => rest.flat().reduce((prev, curr) => prev - curr, v);
+exports.div = (v, ...rest) => rest.flat().reduce((prev, curr) => prev / curr, v);
+exports.mul = (v, ...rest) => rest.flat().reduce((prev, curr) => prev * curr, v);
+exports.mod = (v, ...rest) => rest.flat().reduce((prev, curr) => prev % curr, v);
 
 // Utility methods
 exports.get = get;

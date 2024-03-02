@@ -132,8 +132,6 @@ module.exports = class GraphQLShape {
                 value = Util.isPlainObjectOrArray(json) ? JSONPath({ path: mixed, json, wrap: false }) : json;
               } catch (e) {
                 e.data = { json, mixed };
-                console.log(json);
-                console.log(mixed);
                 throw e;
               }
 
@@ -143,7 +141,6 @@ module.exports = class GraphQLShape {
               Util.map(mixed, (el) => {
                 const [[fnName, args]] = Object.entries(el);
                 value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
-                // value = Util.map(value, v => GraphQLShape.#resolveValueFunction(v, values, fnName, args));
               });
               break;
             }

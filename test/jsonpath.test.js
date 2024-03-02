@@ -68,4 +68,20 @@ describe('JSONPath', () => {
       json: { arr: ['one', 'two', 'three'] },
     })).toEqual('two');
   });
+
+  test('array of attributes', () => {
+    expect(JSONPath({
+      wrap: false,
+      path: '$[*][attr1,attr2]',
+      json: [{ attr1: 'one', attr2: 'two' }, { attr2: 'three' }],
+    })).toEqual(['one', 'two', 'three']);
+  });
+
+  test('array selector', () => {
+    expect(JSONPath({
+      wrap: false,
+      path: ['$[*]', '[attr1,attr2]'],
+      json: [{ attr1: 'one', attr2: 'two' }, { attr2: 'three' }],
+    })).toEqual(['one', 'two', 'three']);
+  });
 });
