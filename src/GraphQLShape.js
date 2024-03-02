@@ -117,7 +117,7 @@ module.exports = class GraphQLShape {
     transforms.forEach(({ key, ops = [] }) => {
       const thunks = [];
 
-      // We assign data here because it's possible to modify the root/data itself (key: '')
+      // We assign data here because it's possible to modify the root/data itself (via key: '')
       data = Util.pathmap(key, data, (value, info) => {
         const vars = [value];
 
@@ -179,7 +179,7 @@ module.exports = class GraphQLShape {
       thunks.forEach(thunk => thunk());
     });
 
-    return data; // For convenience (and testing)
+    return data;
   }
 
   static #resolveVariableArgs(vars, args) {
