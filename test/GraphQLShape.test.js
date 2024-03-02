@@ -68,6 +68,10 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ base: { attr1: 'one', attr2: 'two', attr3: 'three' } }, [
         { key: 'base', ops: [{ pick: [{ attr1: 'attr' }, 'attr3'] }] },
       ])).toEqual({ base: { attr: 'one', attr3: 'three' } });
+
+      expect(GraphQLShape.transform({ obj: [1, 2, 3, 4] }, [
+        { key: 'obj', ops: [{ pick: [2] }] },
+      ])).toEqual({ obj: { 2: 3 } });
     });
 
     test('array manipulation', () => {
@@ -166,6 +170,13 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms4)).toEqual({ obj: 'a' });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms5)).toEqual({ obj: undefined });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms6)).toEqual({ obj: [{ a: 'a' }, 'a', 'a', { b: 'c' }] });
+    });
+
+    test('rename', () => {
+      const transforms1 = [{ key: 'obj', ops: [{ rename: 'data' }] }];
+      const transforms2 = [{ key: 'obj', ops: [{ rename: 'data' }, { self: 'a' }] }];
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms1)).toEqual({ data: { a: 'a' } });
+      expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms2)).toEqual({ data: 'a' });
     });
   });
 

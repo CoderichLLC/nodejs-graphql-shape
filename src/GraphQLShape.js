@@ -115,7 +115,7 @@ module.exports = class GraphQLShape {
   static transform(data, transforms = []) {
     // Apply transformations (in place)
     transforms.forEach(({ key, ops = [] }) => {
-      const hoisted = [];
+      const thunks = [];
 
       // We assign data here because it's possible to modify the root/data itself (key: '')
       data = Util.pathmap(key, data, (value, info) => {
@@ -148,9 +148,18 @@ module.exports = class GraphQLShape {
               value = GraphQLShape.#resolveVariableArgs(vars, mixed);
               break;
             }
+            case 'rename': {
+              thunks.push(() => {
+                info.parent[GraphQLShape.#resolveVariableArgs(vars, mixed)] = value;
+                delete info.parent[info.key];
+              });
+              break;
+            }
             case 'hoist': {
-              if (!mixed) hoisted.push(info);
-              Object.assign(info.parent, value);
+              thunks.push(() => {
+                Object.assign(info.parent, value);
+                if (!mixed) delete info.parent[info.key];
+              });
               break;
             }
             default: {
@@ -166,8 +175,8 @@ module.exports = class GraphQLShape {
         return value;
       });
 
-      // Delete any hoisted keys
-      hoisted.forEach(hoist => delete hoist.parent[hoist.key]);
+      // Deferred processing
+      thunks.forEach(thunk => thunk());
     });
 
     return data; // For convenience (and testing)
