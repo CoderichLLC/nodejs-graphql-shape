@@ -67,12 +67,6 @@ query {
 ```
 
 ### API
-The transformation API is designed to be *extensible* to fit the unique needs of each use-case. You may `define` (or redefine) a *user function* via:
-```javascript
-GraphQLShape.define(tfName, tfFunction); // or
-GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
-```
-> Function signature: `(value, ...args) => newValue`
 By default, the framework provides a set of functions to perform common transformations on input data. Each function falls into 1 of the following categories (in priority order):
 category | functions
 --- | ---
@@ -80,5 +74,26 @@ category | functions
 *core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 *user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, pushIt, flatten, unflatten, pick]`
 *value* | Any value[method]; eg `[toLowerCase, join, split]`
-> Only **user** functions can be defined/redefined via `GraphQLShape.define()`
+##### lib
+function | args | type | description
+--- | --- | --- | ---
+`self` | JSONPath | String, Array | Select values from the current object
+`parent` | JSONPath | String, Array | Select values from the parent object
+`root` | JSONPath | String, Array | Select values from the root object
+`map` | Transform | Object, AoO | Iterate value(s) and apply transform(s) to each value
+`assign` | Value | Any | Assign any value in the pipeline
+`rename` | Key | String | Rename the key of the current object
+`hoist` | Keep? | Boolean | Assign all attributes to the parent and optionally delete object
+##### core
+
+##### user
+##### value
+
+### Extensibility
+The transformation API is designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** function via:
+```javascript
+GraphQLShape.define(tfName, tfFunction); // or
+GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
+```
+> Function signature: `(value, ...args) => newValue`
 
