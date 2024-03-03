@@ -23,14 +23,14 @@ const data = await graphqlClient.request(query, args); // Your own client
 const shaped = transform(data);
 ```
 
-### Annotations (Directives)
+### Annotations (directives)
 By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
 directive | usage | .parse()
 --- | --- | ---
 `@shape` | Define transformations on an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
 `@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
-### Transformations (Pipeline)
+### Transformations (pipeline)
 Transformations are specified as a series of directive parameters and adhere to the following rules:
 * Transformations are applied depth-first (inside-out) and from left-to-right
 * Each transformation receives the value from the previous; creating a data pipeline
@@ -67,4 +67,9 @@ query {
 }
 ```
 
-### API Reference
+##### API (framework)
+The transformation API is designed to be **extensible** to fit the unique needs of each use-case. You may `define` (or redefine) any transformation function via:
+```javascript
+GraphQLShape.define(tfName, tfFunction); // or
+GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction }
+```
