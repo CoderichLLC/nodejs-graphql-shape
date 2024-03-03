@@ -24,14 +24,14 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
-Annotations can be defined on any **field** requiring transformation. By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
+Annotations can be defined on any **field** that requires transformation. By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
 annotation | description | .parse()
 --- | --- | ---
 `@shape` | Transform an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
 `@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
-### Transformations (arguments pipeline)
-Transformations are performed via annotation arguments where each *key* specifies a transformation name and *value* specifies it's arguments.
+### Transformations (annotation arguments)
+Transformations are performed via annotation arguments where each *key:value* specifies a transformation *name:args*
 * Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation assigns it's return value to the field (mutating it)
 * Each transformation receives the current field value as it's first argument
