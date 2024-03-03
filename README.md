@@ -4,9 +4,9 @@
 
 Shape the response of your GraphQL queries, **declaratively!**
 
-This project explores the concept of Query and *Transformation Collocation* in **GraphQL**.
+This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It leverages [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data to any shape you need!
+It utilizes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data to any shape you need!
 
 ---
 
@@ -33,7 +33,7 @@ directive | usage | .parse()
 ### Transformations (Pipeline)
 Transformations are specified as a series of directive parameters on each field and adhere to the following rules:
 * Transformations are applied depth-first (inside-out) and from left-to-right
-* Each transformation receives the value from the previous; creating a pipeline
+* Each transformation receives the value from the previous; creating a data pipeline
 
 ### Example (Kitchen Sink)
 ```graphql
