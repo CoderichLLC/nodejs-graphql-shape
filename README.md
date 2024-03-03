@@ -43,10 +43,8 @@ query {
       node {
         isbn
         title
-        details @shape(pick: ["summary"])
-        author @shape(self: "name") {
-          name
-        }
+        author @shape(self: "name") { name }
+        details @shape(pick: ["summary"]) # mixed/schemaless JSON
       }
     }
   }
@@ -58,11 +56,12 @@ query {
   "books": [
     {
       "isbn": "0-061-96436-0",
-      "title": "Book title",
-      "summary": "Book summary",
-      "author": "Author name"
+      "title": "Moby Dick",
+      "author": "Herman Melville",
+      "summary": "A legendary tale..."
     },
-    { ... }
+    "...",
+    "...",
   ]
 }
 ```
