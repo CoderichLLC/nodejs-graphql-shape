@@ -157,6 +157,14 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ obj: { lever: 'd', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'd', name: 'd' } });
     });
 
+    test('set', () => {
+      const transforms = [{
+        key: 'arr',
+        ops: [{ Set: 'new' }, { Array: 'from' }, { sort: null }],
+      }];
+      expect(GraphQLShape.transform({ arr: [1, 2, 1, 5, 4, 3, 2, 1, 1, 5] }, transforms)).toEqual({ arr: [1, 2, 3, 4, 5] });
+    });
+
     test('assign', () => {
       const transforms1 = [{ key: 'obj', ops: [{ self: 'a' }] }];
       const transforms2 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: 'b' }] }];

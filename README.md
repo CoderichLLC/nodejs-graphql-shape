@@ -6,7 +6,7 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data into any shape you need!
+It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data into the exact shape you need!
 
 ---
 
@@ -31,40 +31,17 @@ directive | usage | .parse()
 `@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are specified as a series of directive parameters that   adhere to the following rules:
+Transformations are defined as a series of directive parameters that adhere to the following rules:
 * Transformations are applied depth-first (inside-out, bottom-up) and from left-to-right
-* Each transformation receives the value from the previous; creating a data pipeline
+* Each transformation receives the return value from the previous; creating a data pipeline
 
-##### Example
-```graphql
-query {
-  books @shape(self: "edges[*].node") {
-    edges {
-      node {
-        isbn
-        title
-        author @shape(self: "name") { name }
-        details @shape(pick: ["summary", "rating"], hoist: false) # mixed/schemaless JSON
-      }
-    }
-  }
-}
+The transformation API is designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** function via:
+```javascript
+GraphQLShape.define(tfName, tfFunction); // or
+GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
 ```
+> Function signature: `(value, ...args) => newValue`
 
-```json
-{
-  "books": [
-    {
-      "isbn": "0-061-96436-0",
-      "title": "Moby Dick",
-      "author": "Herman Melville",
-      "summary": "A legendary tale...",
-      "rating": "4.90"
-    },
-    "...",
-  ]
-}
-```
 
 ### API
 By default, the framework provides a set of functions to perform common transformations on input data. Each function falls into 1 of the following categories (in priority order):
@@ -119,11 +96,33 @@ query {
 ##### user
 ##### value
 
-### Extensibility
-The transformation API is designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** function via:
-```javascript
-GraphQLShape.define(tfName, tfFunction); // or
-GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
+##### Example
+```graphql
+query {
+  books @shape(self: "edges[*].node") {
+    edges {
+      node {
+        isbn
+        title
+        author @shape(self: "name") { name }
+        details @shape(pick: ["summary", "rating"], hoist: false) # mixed/schemaless JSON
+      }
+    }
+  }
+}
 ```
-> Function signature: `(value, ...args) => newValue`
 
+```json
+{
+  "books": [
+    {
+      "isbn": "0-061-96436-0",
+      "title": "Moby Dick",
+      "author": "Herman Melville",
+      "summary": "A legendary tale...",
+      "rating": "4.90"
+    },
+    "...",
+  ]
+}
+```
