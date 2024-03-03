@@ -35,7 +35,7 @@ Transformations are specified as a series of directive parameters on each field 
 * Transformations are applied depth-first (inside-out) and from left-to-right
 * Each transformation receives the value from the previous; creating a data pipeline
 
-### Basic Example
+##### Example
 ```graphql
 query {
   books @shape(self: "edges[*].node") {
