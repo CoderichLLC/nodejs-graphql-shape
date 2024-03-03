@@ -6,7 +6,7 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It includes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) to help select and transform data to the exact shape you need!
+It includes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) to help select and transform data to the exact shape required!
 
 ---
 
@@ -24,7 +24,7 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
-Annotations are to be placed on any **field** you wish to transform.
+Annotations can be defined on any **field** you wish to transform.
 By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
 directive | description | .parse()
 --- | --- | ---
