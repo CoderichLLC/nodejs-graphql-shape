@@ -31,7 +31,7 @@ directive | usage | .parse()
 `@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are defined as a series of directive parameters that adhere to the following rules:
+Transformations are performed via as a series of directive parameters that adhere to the following rules:
 * Transformations are applied depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
