@@ -35,7 +35,7 @@ Transformations are performed via as a series of directive parameters that adher
 * Transformations are applied depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
-Transformations are designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** transformation function via:
+Transformations are designed to be extensible to fit any unique use-case. You may `define` (or redefine) a **user** transformation function via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
@@ -44,15 +44,10 @@ GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ...
 
 
 ### API
-By default, the framework provides a set of functions to perform common transformations on input data. Each function falls into 1 of the following categories (in priority order):
+By default, the framework provides a set of functions to perform common data transformations. Each function falls into 1 of the following categories (in priority order):
 category | functions
---- | ---
-*lib* | `[self, parent, root, map, assign, rename, hoist]`
-*core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
-*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, flatten, unflatten, pick]`
-*value* | Any value[method]; eg `[toLowerCase, join, split]`
 
-##### lib
+##### Lib
 key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select values from the current object
@@ -81,7 +76,7 @@ query {
 }
 ```
 
-##### core
+##### Core
 Javascript core objects `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 key | args | description | example
 --- | --- | --- | ---
@@ -93,8 +88,15 @@ query {
 
 }
 ```
-##### user
-##### value
+##### User
+##### Value
+
+
+--- | ---
+*lib* | `[self, parent, root, map, assign, rename, hoist]`
+*core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, flatten, unflatten, pick]`
+*value* | Any value[method]; eg `[toLowerCase, join, split]`
 
 ##### Example
 ```graphql
