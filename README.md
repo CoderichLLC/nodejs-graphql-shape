@@ -12,7 +12,7 @@ It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to h
 
 ### Usage
 1. Annotate a query with transformation rules
-2. Parse the AST/QueryString pre-request
+2. Parse the query AST/String pre-request
 3. Transform the result post-response
 
 ```javascript
@@ -35,7 +35,7 @@ Transformations are defined as a series of directive parameters that adhere to t
 * Transformations are applied depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
-The transformation API is designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** function via:
+Transformations are designed to be extensible to fit the unique needs of each use-case. You may `define` (or redefine) a **user** transformation function via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
