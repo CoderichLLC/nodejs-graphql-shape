@@ -6,7 +6,7 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data into the exact shape you need!
+It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data to the exact shape you need!
 
 ---
 
@@ -24,18 +24,19 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
+Annotations may be placed on any **field** you wish to transform.
 By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
-directive | usage | .parse()
+directive | description | .parse()
 --- | --- | ---
-`@shape` | Define transformations on an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
-`@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
+`@shape` | For use on an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
+`@_shape` | For use on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are performed via as a series of directive parameters that adhere to the following rules:
-* Transformations are applied depth-first (inside-out, bottom-up) and from left-to-right
+Transformations are performed via as a series of key/value directive parameters that adhere to the following rules:
+* Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
-Transformations are designed to be extensible to fit any unique use-case. You may `define` (or redefine) a **user** transformation function via:
+Transformations are designed to be extensible to fit any use-case. You may `define` (or redefine) a **user** transformation via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
@@ -44,54 +45,33 @@ GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ...
 
 
 ### API
-By default, the framework provides a set of functions to perform common data transformations. Each function falls into 1 of the following categories (in priority order):
-category | functions
+By default, the framework provides a set of functions to perform common data transformations. Each function falls into 1 of the following categories (in order of preference):
 
 ##### Lib
+These functions are the first used when attempting to match a given *key*:
 key | value | type | description
 --- | --- | --- | ---
-`self` | JSONPath | String, Array | Select values from the current object
-`parent` | JSONPath | String, Array | Select values from the parent object
-`root` | JSONPath | String, Array | Select values from the root object
-`map` | Transform | Object, AoO | Iterate value(s) and apply transformation(s) to each
-`assign` | Value | Any | Assign any value in the pipeline
-`rename` | Key | String | Rename the key of the current object
-`hoist` | Keep? | Boolean | Assign all attributes to the parent and optionally delete object
-```graphql
-query {
-  books @shape(self: "edges[*].node") {
-    edges {
-      node {
-        title
-        author @shape(self: "name") {
-          name
-        }
-        stores {
-          name
-          price
-        }
-      }
-    }
-  }
-}
-```
+`self` | JSONPath | String, Array | Select from the current field
+`parent` | JSONPath | String, Array | Select from the field's parent
+`root` | JSONPath | String, Array | Select from the root object
+`map` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
+`assign` | Value | Any | Assign a value to the field
+`rename` | Key | String | Rename the field key
+`hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 ##### Core
-Javascript core objects `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
-key | args | description | example
---- | --- | --- | ---
-`*` | Method | Invoke a core object method | `Date.now(value, ...args)`
-`*` | null | Invoke a core object (no method) | `Object(value, ...args)`
-`*` | "new" | Instantiate a new core object | `new Array(value, ...args)`
-```graphql
-query {
+You may provide a *key* for the following Javascript Core Objects `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+key | value | type | description | example
+--- | --- | --- | --- | ---
+`*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
+`*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
+`*` | "new" | String | Instantiate a core object | `new Array(value, ...args)`
 
-}
-```
 ##### User
+
 ##### Value
 
-
+category | functions
 --- | ---
 *lib* | `[self, parent, root, map, assign, rename, hoist]`
 *core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
@@ -126,5 +106,24 @@ query {
     },
     "...",
   ]
+}
+```
+
+```graphql
+query {
+  books @shape(self: "edges[*].node") {
+    edges {
+      node {
+        title
+        author @shape(self: "name") {
+          name
+        }
+        stores {
+          name
+          price
+        }
+      }
+    }
+  }
 }
 ```
