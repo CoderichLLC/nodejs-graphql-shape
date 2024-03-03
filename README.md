@@ -31,14 +31,14 @@ annotation | description | .parse()
 `@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (arguments pipeline)
-Transformations are parsed via annotation arguments (`key: value` pairs) where each *key* specifies a transformation and *value* specifies it's arguments.
-* Arguments are evaluated depth-first (inside-out, bottom-up) and from left-to-right
-* The first argument to each transformation is the value from the previous; creating a data pipeline
+Transformations are performed via annotation arguments (`key: value` pairs) where each *key* specifies a transformation and *value* specifies it's arguments.
+* Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
+* The first transformation argument is the value from the previous; creating a data pipeline
 
 You may `define` (or redefine) any **user** transformation via:
 ```javascript
-GraphQLShape.define(name, function); // or
-GraphQLShape.define(Map); // { name: function, name: function, ... }
+GraphQLShape.define(key, function); // or
+GraphQLShape.define(Map); // { key: function, key: function, ... }
 ```
 > Function signature: `(value, ...args) => newValue`
 
