@@ -72,20 +72,50 @@ category | functions
 --- | ---
 *lib* | `[self, parent, root, map, assign, rename, hoist]`
 *core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
-*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, pushIt, flatten, unflatten, pick]`
+*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, flatten, unflatten, pick]`
 *value* | Any value[method]; eg `[toLowerCase, join, split]`
+
 ##### lib
-function | args | type | description
+key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select values from the current object
 `parent` | JSONPath | String, Array | Select values from the parent object
 `root` | JSONPath | String, Array | Select values from the root object
-`map` | Transform | Object, AoO | Iterate value(s) and apply transform(s) to each value
+`map` | Transform | Object, AoO | Iterate value(s) and apply transformation(s) to each
 `assign` | Value | Any | Assign any value in the pipeline
 `rename` | Key | String | Rename the key of the current object
 `hoist` | Keep? | Boolean | Assign all attributes to the parent and optionally delete object
-##### core
+```graphql
+query {
+  books @shape(self: "edges[*].node") {
+    edges {
+      node {
+        title
+        author @shape(self: "name") {
+          name
+        }
+        stores {
+          name
+          price
+        }
+      }
+    }
+  }
+}
+```
 
+##### core
+Javascript core objects `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+key | args | description | example
+--- | --- | --- | ---
+`*` | Method | Invoke a core object method | `Date.now(value, ...args)`
+`*` | null | Invoke a core object (no method) | `Object(value, ...args)`
+`*` | "new" | Instantiate a new core object | `new Array(value, ...args)`
+```graphql
+query {
+
+}
+```
 ##### user
 ##### value
 
