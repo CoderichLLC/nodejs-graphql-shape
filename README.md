@@ -79,7 +79,7 @@ GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ...
 By default, the framework provides a set of functions to perform common operations on input data. Each transformation function falls into 1 of 3 categories:
 category | functions
 --- | ---
-*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, pushIt, flatten, unflatten, pick]`
-*core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 *framework* | `[self, parent, root, map, assign, rename, hoist]`
+*core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, pushIt, flatten, unflatten, pick]`
 > Only **user** functions can be defined/redefined via `GraphQLShape.define()`
