@@ -36,7 +36,7 @@ Transformations are performed via annotation arguments where each *key* specifie
 * Each transformation assigns it's return value to the field (mutating it)
 * Each transformation receives the current field value as it's first argument
 
-You may `define` (or redefine) a custom transformation via:
+You may `define` (or redefine) a custom (user) transformation via:
 ```javascript
 GraphQLShape.define(name, function); // or
 GraphQLShape.define(Map); // { name: function, name: function, ... }
@@ -46,10 +46,9 @@ GraphQLShape.define(Map); // { name: function, name: function, ... }
 
 ### API
 
-By default, the framework provides a set of common transformation functions. Each function falls into 1 of the following categories (in order of preference):
+By default the framework provides a set of common transformations. Each transformation falls into 1 of the following dictionaries (in order of preference) that are referenced when obtaining a transformation by name:
 
 ##### Lib
-These functions are the first used when attempting to match an argument *key*:
 key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select from the current field
@@ -61,7 +60,7 @@ key | value | type | description
 `hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 ##### Core
-You can invoke a Javascript Core Object via argument *key*: `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+`{ Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl }`
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
