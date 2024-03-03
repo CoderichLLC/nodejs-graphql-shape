@@ -31,7 +31,7 @@ directive | usage | .parse()
 `@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are specified as a series of directive parameters and adhere to the following rules:
+Transformations are specified as a series of directive parameters that   adhere to the following rules:
 * Transformations are applied depth-first (inside-out) and from left-to-right
 * Each transformation receives the value from the previous; creating a data pipeline
 
@@ -67,9 +67,10 @@ query {
 }
 ```
 
-##### API (framework)
-The transformation API is designed to be **extensible** to fit the unique needs of each use-case. You may `define` (or redefine) any transformation function via:
+##### API (extensibity)
+The transformation API is designed to be *extensible* to fit the unique needs of each use-case. You may `define` (or redefine) any transformation function via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
-GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction }
+GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
 ```
+> Transformation function signature `(value, ...args) => ...`
