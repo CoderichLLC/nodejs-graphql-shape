@@ -69,14 +69,14 @@ query {
 
 ### API
 ##### Extensibility
-The transformation API is designed to be *extensible* to fit the unique needs of each use-case. You may `define` (or redefine) a transformation *user function* via:
+The transformation API is designed to be *extensible* to fit the unique needs of each use-case. You may `define` (or redefine) a *user function* via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
 ```
-> Transformation function signature: `(value, ...args) => newValue`
+> Function signature: `(value, ...args) => newValue`
 ##### Framework
-By default, the framework provides a set of functions to perform common operations on input data. Each transformation function falls into 1 of 3 categories:
+By default, the framework provides a set of functions to perform common operations on input data. Each function falls into 1 of 3 categories:
 category | functions
 --- | ---
 *framework* | `[self, parent, root, map, assign, rename, hoist]`
