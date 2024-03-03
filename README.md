@@ -6,7 +6,7 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It utilizes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data to any shape you need!
+It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data into any shape you need!
 
 ---
 
@@ -31,7 +31,7 @@ directive | usage | .parse()
 `@_shape` | Define transformations on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (Pipeline)
-Transformations are specified as a series of directive parameters on each field and adhere to the following rules:
+Transformations are specified as a series of directive parameters and adhere to the following rules:
 * Transformations are applied depth-first (inside-out) and from left-to-right
 * Each transformation receives the value from the previous; creating a data pipeline
 
@@ -44,7 +44,7 @@ query {
         isbn
         title
         author @shape(self: "name") { name }
-        details @shape(pick: ["summary"]) # mixed/schemaless JSON
+        details @shape(pick: ["summary", "rating"], hoist: false) # mixed/schemaless JSON
       }
     }
   }
@@ -58,10 +58,13 @@ query {
       "isbn": "0-061-96436-0",
       "title": "Moby Dick",
       "author": "Herman Melville",
-      "summary": "A legendary tale..."
+      "summary": "A legendary tale...",
+      "rating": "4.90"
     },
     "...",
     "...",
   ]
 }
 ```
+
+### API Reference
