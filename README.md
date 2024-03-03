@@ -24,30 +24,31 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
-Annotations (and their transformation arguments) can be defined on any **field** needed to transform. By default, the annotation name is `shape` and may be configured via `options.name` when calling `parse()`
+Annotations can be defined on any **field** needed for transformation. By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
 annotation | description | .parse()
 --- | --- | ---
 `@shape` | Transform an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
-`@_shape` | Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
+`@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
-### Transformations (pipeline)
-Transformations are performed via directive arguments and adhere to the following rules:
+### Transformations (arguments pipeline)
+Transformations are parsed via annotation arguments (`key: value` pairs) where each *key* specifies a transformation and *value* specifies it's arguments.
 * Arguments are evaluated depth-first (inside-out, bottom-up) and from left-to-right
-* Each transformation receives the return value from the previous; creating a data pipeline
+* The first argument to each transformation is the value from the previous; creating a data pipeline
 
-You may `define` (or redefine) a **user** transformation via:
+You may `define` (or redefine) any **user** transformation via:
 ```javascript
-GraphQLShape.define(tfName, tfFunction); // or
-GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
+GraphQLShape.define(name, function); // or
+GraphQLShape.define(Map); // { name: function, name: function, ... }
 ```
 > Function signature: `(value, ...args) => newValue`
 
 
 ### API
-By default, the framework provides a set of common data transformation functions. Each function falls into 1 of the following categories (in order of preference):
+
+By default, the framework provides a set of common transformation functions. Each function falls into 1 of the following categories (in order of preference):
 
 ##### Lib
-These functions are the first used when attempting to match a given *key*:
+These functions are the first used when attempting to match an argument *key*:
 key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select from the current field
@@ -59,7 +60,7 @@ key | value | type | description
 `hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 ##### Core
-You may provide a *key* for the following Javascript Core Objects `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+You can invoke a Javascript Core Object via argument *key*: `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
