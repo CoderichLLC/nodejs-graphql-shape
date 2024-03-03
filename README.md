@@ -6,7 +6,7 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It supports [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) syntax to help select and transform data to the exact shape you need!
+It includes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) to help select and transform data to the exact shape you need!
 
 ---
 
@@ -24,7 +24,7 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
-Annotations may be placed on any **field** you wish to transform.
+Annotations are to be placed on any **field** you wish to transform.
 By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
 directive | description | .parse()
 --- | --- | ---
@@ -32,11 +32,11 @@ directive | description | .parse()
 `@_shape` | For use on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are performed via as a series of key/value directive parameters that adhere to the following rules:
+Transformations are performed via as a series of parameters placed on each directive and adhere to the following rules:
 * Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
-Transformations are designed to be extensible to fit any use-case. You may `define` (or redefine) a **user** transformation via:
+You may `define` (or redefine) a customer **user** transformation via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
