@@ -24,19 +24,18 @@ const shaped = transform(data);
 ```
 
 ### Annotations (directives)
-Annotations can be defined on any **field** you wish to transform.
-By default, the directive name is `shape` and may be configured via `options.name` when calling `parse()`
-directive | description | .parse()
+Annotations (and their transformation arguments) can be defined on any **field** needed to transform. By default, the annotation name is `shape` and may be configured via `options.name` when calling `parse()`
+annotation | description | .parse()
 --- | --- | ---
-`@shape` | For use on an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
-`@_shape` | For use on a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
+`@shape` | Transform an **existing** field in the GraphQL Schema | The *annotation* is removed from the *field*
+`@_shape` | Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (pipeline)
-Transformations are performed via as a series of parameters placed on each directive and adhere to the following rules:
-* Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
+Transformations are performed via directive arguments and adhere to the following rules:
+* Arguments are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation receives the return value from the previous; creating a data pipeline
 
-You may `define` (or redefine) a customer **user** transformation via:
+You may `define` (or redefine) a **user** transformation via:
 ```javascript
 GraphQLShape.define(tfName, tfFunction); // or
 GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ... }
@@ -45,7 +44,7 @@ GraphQLShape.define(objectMap); // { tfName: tfFunction, tfName: tfFunction, ...
 
 
 ### API
-By default, the framework provides a set of functions to perform common data transformations. Each function falls into 1 of the following categories (in order of preference):
+By default, the framework provides a set of common data transformation functions. Each function falls into 1 of the following categories (in order of preference):
 
 ##### Lib
 These functions are the first used when attempting to match a given *key*:
