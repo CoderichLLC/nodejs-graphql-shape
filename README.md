@@ -35,19 +35,34 @@ Transformations are specified as a series of directive parameters on each field 
 * Transformations are applied depth-first (inside-out) and from left-to-right
 * Each transformation receives the value from the previous; creating a data pipeline
 
-### Example (Kitchen Sink)
+### Basic Example
 ```graphql
 query {
-  books {
+  books @shape(self: "edges[*].node") {
     edges {
       node {
         isbn
         title
-        author {
+        details @shape(pick: ["summary"])
+        author @shape(self: "name") {
           name
         }
       }
     }
   }
+}
+```
+
+```json
+{
+  "books": [
+    {
+      "isbn": "0-061-96436-0",
+      "title": "Book title",
+      "summary": "Book summary",
+      "author": "Author name"
+    },
+    { ... }
+  ]
 }
 ```
