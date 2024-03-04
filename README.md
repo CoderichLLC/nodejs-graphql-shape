@@ -31,24 +31,24 @@ annotation | description | .parse()
 `@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (annotation arguments)
-Transformations are performed via annotation arguments where each *key:value* specifies a transformation *name:args*
+Transformations are performed via annotation arguments where each *key:value* pair specifies a transformation *name:args*
 * Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
-* Each transformation assigns it's return value to the field (mutating it)
+* Each transformation assigns it's return value to the annotated field (mutating it)
 * Each transformation receives the current field value as it's first argument
 
-You may `define` (or redefine) a custom (user) transformation via:
+You may `define` (or redefine) a *user* transformation via:
 ```javascript
 GraphQLShape.define(name, function); // or
 GraphQLShape.define(Map); // { name: function, name: function, ... }
 ```
 > Function signature: `(value, ...args) => newValue`
 
-
 ### API
 
-By default the framework provides a set of common transformations. Each transformation falls into 1 of the following dictionaries (in order of preference) that are referenced when obtaining a transformation by name:
+Internally, each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
 
 ##### Lib
+Base transformations. Cannot be re-defined.
 key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select from the current field
