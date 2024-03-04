@@ -47,7 +47,7 @@ GraphQLShape.define(Map); // { name: function, name: function, ... }
 
 Internally, each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
 
-##### Lib
+#### Lib
 Base transformations. Cannot be re-defined.
 key | value | type | description
 --- | --- | --- | ---
@@ -59,17 +59,27 @@ key | value | type | description
 `rename` | Key | String | Rename the field key
 `hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
-##### Core
-`{ Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl }`
+#### Core
+Javascript core object references: `{ Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl }`. Cannot be re-defined.
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
 `*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
 `*` | "new" | String | Instantiate a core object | `new Array(value, ...args)`
 
-##### User
+#### User
+Useful starting set of transformations. **Can** be re-defined.
+key | value | type | description
+--- | --- | --- | ---
+`self` | JSONPath | String, Array | Select from the current field
+`parent` | JSONPath | String, Array | Select from the field's parent
+`root` | JSONPath | String, Array | Select from the root object
+`map` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
+`assign` | Value | Any | Assign a value to the field
+`rename` | Key | String | Rename the field key
+`hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
-##### Value
+#### Value
 
 category | functions
 --- | ---
@@ -78,7 +88,7 @@ category | functions
 *user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, flatten, unflatten, pick]`
 *value* | Any value[method]; eg `[toLowerCase, join, split]`
 
-##### Example
+# Examples
 ```graphql
 query {
   books @shape(self: "edges[*].node") {
