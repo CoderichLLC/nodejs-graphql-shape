@@ -74,15 +74,15 @@ query {
 Each transformation falls into 1 of the following lookup tables (referenced in order of preference):
 
 #### Lib
-name | arg | type | description
---- | --- | --- | ---
-`self` | {string|array} JSONPath | String, Array | Select from the current field
-`parent` | JSONPath | String, Array | Select from the field's parent
-`root` | JSONPath | String, Array | Select from the root object
-`map` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
-`assign` | Value | Any | Assign a value to the field
-`rename` | Key | String | Rename the field key
-`hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+name | arg | description
+--- | --- | ---
+`self` | {string\|array} JSONPath | Select from the current field
+`parent` | {string\|array} JSONPath | Select from the field's parent
+`root` | {string\|array} JSONPath | Select from the root object
+`map` | {Object\|AoO} Transform | Iterate field value(s) and apply transformation(s) to each
+`assign` | {*} Value | Assign a value to the field
+`rename` | {string} Key | Rename the field key
+`hoist` | {boolean} Keep | Hoist all field attributes to the parent and optionally delete field
 
 #### Core
 Javascript core object references. Cannot be re-defined.
