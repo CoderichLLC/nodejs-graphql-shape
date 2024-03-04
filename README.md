@@ -61,12 +61,12 @@ key | value | type | description
 
 #### Core
 Javascript core object references. Cannot be re-defined.
+> Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
 `*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
 `*` | "new" | String | Instantiate a core object | `new Array(value, ...args)`
-> Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 
 #### User
 Useful starting set of transformations. **Can** be re-defined.
