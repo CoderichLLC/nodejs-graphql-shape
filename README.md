@@ -45,7 +45,7 @@ GraphQLShape.define(Map); // { name: function, name: function, ... }
 
 ### API
 
-Internally, each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
+Each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
 
 #### Lib
 Base transformations. Cannot be re-defined.
@@ -60,12 +60,13 @@ key | value | type | description
 `hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 #### Core
-Javascript core object references: `{ Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl }`. Cannot be re-defined.
+Javascript core object references. Cannot be re-defined.
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
 `*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
 `*` | "new" | String | Instantiate a core object | `new Array(value, ...args)`
+> Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 
 #### User
 Useful starting set of transformations. **Can** be re-defined.
