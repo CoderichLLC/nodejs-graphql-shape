@@ -31,7 +31,7 @@ annotation | description | .parse()
 `@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (annotation arguments)
-Transformations are performed via annotation arguments where each *key:value* pair specifies a transformation *name:args*
+Transformations are performed via annotation arguments where each *key:value* pair maps a transformation *name:args* pair
 * Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation assigns it's return value to the annotated field (mutating it)
 * Each transformation receives the current field value as it's first argument
