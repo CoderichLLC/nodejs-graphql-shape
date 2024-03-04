@@ -192,17 +192,25 @@ module.exports = class GraphQLShape {
   static #resolveValueFunction(value, vars, fn, ...args) {
     // Argument replacement variables
     args = GraphQLShape.#resolveVariableArgs(vars, args.flat());
+    const firstUserArg = args.shift();
 
     // Core functions have a special syntax
     if (core[fn]) {
-      const method = args.shift();
-      if (method === 'new') return new core[fn](value, ...args);
-      if (method === null) return core[fn](value, ...args);
-      return core[fn][method](value, ...args);
+      if (firstUserArg === 'new') return new core[fn](value, ...args);
+      if (firstUserArg === null) return core[fn](value, ...args);
+      return core[fn][firstUserArg](value, ...args);
     }
 
-    if (functions[fn]) return functions[fn](value, ...args);
-    if (value?.[fn]) return value[fn](...args);
+    if (functions[fn]) {
+      if (firstUserArg === null) return functions[fn](value, ...args);
+      return functions[fn](value, firstUserArg, ...args);
+    }
+
+    if (typeof value?.[fn] === 'function') {
+      if (firstUserArg === null) return value[fn](...args);
+      return value[fn](firstUserArg, ...args);
+    }
+
     return value;
   }
 

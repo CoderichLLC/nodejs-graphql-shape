@@ -157,6 +157,32 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ obj: { lever: 'd', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'd', name: 'd' } });
     });
 
+    test('new Set()', () => {
+      const transforms = [{
+        key: 'arr',
+        ops: [{ Set: 'new' }, { Array: 'from' }, { sort: null }],
+      }];
+      expect(GraphQLShape.transform({ arr: [1, 2, 1, 5, 4, 3, 2, 1, 1, 5] }, transforms)).toEqual({ arr: [1, 2, 3, 4, 5] });
+    });
+
+    test('push|concat', () => {
+      const push = [{ key: 'arr', ops: [{ push: 1 }] }];
+      const pushs = [{ key: 'arr', ops: [{ push: [1, 2, 3] }] }];
+      const concat = [{ key: 'arr', ops: [{ concat: [1, 2, 3] }] }];
+      expect(GraphQLShape.transform({ arr: [] }, push)).toEqual({ arr: [1] });
+      expect(GraphQLShape.transform({ arr: [] }, pushs)).toEqual({ arr: [1, 2, 3] });
+      expect(GraphQLShape.transform({ arr: [] }, concat)).toEqual({ arr: [1, 2, 3] });
+    });
+
+    test('default', () => {
+      const def = [{ key: 'obj', ops: [{ self: 'name' }, { default: 'unknown' }] }];
+      expect(GraphQLShape.transform({ obj: { name: 'rich' } }, def)).toEqual({ obj: 'rich' });
+      expect(GraphQLShape.transform({ obj: { name: '' } }, def)).toEqual({ obj: '' });
+      expect(GraphQLShape.transform({ obj: { name: null } }, def)).toEqual({ obj: 'unknown' });
+      expect(GraphQLShape.transform({ obj: {} }, def)).toEqual({ obj: 'unknown' });
+      expect(GraphQLShape.transform({ obj: null }, def)).toEqual({ obj: 'unknown' });
+    });
+
     test('assign', () => {
       const transforms1 = [{ key: 'obj', ops: [{ self: 'a' }] }];
       const transforms2 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: 'b' }] }];
@@ -164,12 +190,14 @@ describe('GraphQLShape', () => {
       const transforms4 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: '$1' }] }];
       const transforms5 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: '$2' }] }];
       const transforms6 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: ['$0', '$1', 'a', { b: 'c' }] }] }];
+      const transforms7 = [{ key: 'obj.idk', ops: [{ assign: '7' }] }];
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms1)).toEqual({ obj: 'a' }); // Sanity test
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms2)).toEqual({ obj: 'b' });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms3)).toEqual({ obj: { a: 'a' } });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms4)).toEqual({ obj: 'a' });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms5)).toEqual({ obj: undefined });
       expect(GraphQLShape.transform({ obj: { a: 'a' } }, transforms6)).toEqual({ obj: [{ a: 'a' }, 'a', 'a', { b: 'c' }] });
+      expect(GraphQLShape.transform({ obj: {} }, transforms7)).toEqual({ obj: { idk: '7' } });
     });
 
     test('rename', () => {
