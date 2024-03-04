@@ -62,6 +62,7 @@ key | value | type | description
 #### Core
 Javascript core object references. Cannot be re-defined.
 > Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
+
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
