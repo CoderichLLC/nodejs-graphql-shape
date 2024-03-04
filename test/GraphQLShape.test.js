@@ -174,6 +174,15 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ arr: [] }, concat)).toEqual({ arr: [1, 2, 3] });
     });
 
+    test('default', () => {
+      const def = [{ key: 'obj', ops: [{ self: 'name' }, { default: 'unknown' }] }];
+      expect(GraphQLShape.transform({ obj: { name: 'rich' } }, def)).toEqual({ obj: 'rich' });
+      expect(GraphQLShape.transform({ obj: { name: '' } }, def)).toEqual({ obj: '' });
+      expect(GraphQLShape.transform({ obj: { name: null } }, def)).toEqual({ obj: 'unknown' });
+      expect(GraphQLShape.transform({ obj: {} }, def)).toEqual({ obj: 'unknown' });
+      expect(GraphQLShape.transform({ obj: null }, def)).toEqual({ obj: 'unknown' });
+    });
+
     test('assign', () => {
       const transforms1 = [{ key: 'obj', ops: [{ self: 'a' }] }];
       const transforms2 = [{ key: 'obj', ops: [{ self: 'a' }, { assign: 'b' }] }];

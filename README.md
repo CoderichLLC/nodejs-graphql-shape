@@ -44,8 +44,10 @@ query {
       node {
         isbn
         title
-        author @shape(self: "name") { name }
-        details @shape(pick: ["summary", "rating"], hoist: false) # mixed/schemaless JSON
+        author @shape(self: "name") {
+          name
+        }
+        details @shape(pick: ["summary", "rating"], hoist: false) # Schemaless JSON
       }
     }
   }
@@ -68,13 +70,6 @@ query {
 ```
 
 ### API
-
-You may `define` (or redefine) a *user* transformation via:
-```javascript
-GraphQLShape.define(name, function); // or
-GraphQLShape.define(Map); // { name: function, name: function, ... }
-```
-> Function signature: `(value, ...args) => newValue`
 
 Each transformation falls into 1 of the following lookup tables (referenced in order of preference):
 
@@ -107,9 +102,9 @@ key | value | type | description
 `pop` | null | null | `Array.pop`; return array
 `shift` | null | null | `Array.shift`; return array
 `unshift` | Any | String, Array | `Array.unshift`; return array
-`in` | Value | Any | Assign a value to the field
-`nin` | Key | String | Rename the field key
-`eq` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`in` | Values | Array | Return boolean if value in values
+`nin` | Values | Array | Return boolean if value not in values
+`eq` | Values | Array | Hoist all field attributes to the parent and optionally delete field
 `ne` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `gt` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `gte` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
@@ -127,10 +122,19 @@ key | value | type | description
 `set` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `nvl` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `uvl` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`default` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`pick` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `pairs` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `flatten` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 `unflatten` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
-`pick` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 #### Value
 Lastly, invoke value.key(...args) if function; otherwise return value.
+
+### Extension
+You may `define` (or redefine) a *user* transformation via:
+```javascript
+GraphQLShape.define(name, function); // or
+GraphQLShape.define(Map); // { name: function, name: function, ... }
+```
+> Function signature: `(value, ...args) => newValue`

@@ -50,6 +50,7 @@ exports.uvl = Util.uvl;
 exports.pairs = Util.pairs;
 exports.flatten = Util.flatten;
 exports.unflatten = Util.unflatten;
+exports.default = (v, ...args) => Util.ensureArray(v).concat(args.flat()).find(el => el != null);
 
 // Pick keys (with optional rename)
 exports.pick = (v, ...args) => args.reduce((prev, mixed) => {
