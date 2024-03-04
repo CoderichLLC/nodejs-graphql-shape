@@ -74,10 +74,9 @@ query {
 Each transformation falls into 1 of the following lookup tables (referenced in order of preference):
 
 #### Lib
-Baseline transformations. Cannot be re-defined.
-key | value | type | description
+name | arg | type | description
 --- | --- | --- | ---
-`self` | JSONPath | String, Array | Select from the current field
+`self` | {string|array} JSONPath | String, Array | Select from the current field
 `parent` | JSONPath | String, Array | Select from the field's parent
 `root` | JSONPath | String, Array | Select from the root object
 `map` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
@@ -87,7 +86,7 @@ key | value | type | description
 
 #### Core
 Javascript core object references. Cannot be re-defined.
-key | value | type | description | example
+name | arg | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
 `*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
@@ -96,7 +95,7 @@ key | value | type | description | example
 
 #### User
 Useful set of transformations. **Can** be re-defined.
-key | value | type | description
+name | arg | type | description
 --- | --- | --- | ---
 `push` | Any | String, Array | `Array.concat` alias
 `pop` | null | null | `Array.pop`; return array
