@@ -48,7 +48,7 @@ GraphQLShape.define(Map); // { name: function, name: function, ... }
 Each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
 
 #### Lib
-Base transformations. Cannot be re-defined.
+Baseline transformations. Cannot be re-defined.
 key | value | type | description
 --- | --- | --- | ---
 `self` | JSONPath | String, Array | Select from the current field
@@ -61,34 +61,48 @@ key | value | type | description
 
 #### Core
 Javascript core object references. Cannot be re-defined.
-> Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
-
 key | value | type | description | example
 --- | --- | --- | --- | ---
 `*` | Method | String | Invoke a core object method | `Date.now(value, ...args)`
 `*` | null | null |Invoke a core object (no method) | `Boolean(value, ...args)`
 `*` | "new" | String | Instantiate a core object | `new Array(value, ...args)`
+> Where `*` is one of `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
 
 #### User
-Useful starting set of transformations. **Can** be re-defined.
+Useful set of transformations. **Can** be re-defined.
 key | value | type | description
 --- | --- | --- | ---
-`self` | JSONPath | String, Array | Select from the current field
-`parent` | JSONPath | String, Array | Select from the field's parent
-`root` | JSONPath | String, Array | Select from the root object
-`map` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
-`assign` | Value | Any | Assign a value to the field
-`rename` | Key | String | Rename the field key
-`hoist` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`push` | JSONPath | String, Array | Select from the current field
+`pop` | JSONPath | String, Array | Select from the field's parent
+`shift` | JSONPath | String, Array | Select from the root object
+`unshift` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
+`in` | Value | Any | Assign a value to the field
+`nin` | Key | String | Rename the field key
+`eq` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`ne` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`gt` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`gte` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`lt` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`lte` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`not` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`or` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`and` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`add` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`sub` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`div` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`mul` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`mod` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`get` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`set` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`nvl` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`uvl` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`pairs` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`flatten` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`unflatten` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`pick` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 #### Value
-
-category | functions
---- | ---
-*lib* | `[self, parent, root, map, assign, rename, hoist]`
-*core* | `[Object, Array, Number, String, Boolean, Symbol, Date, RegExp, Set, Map, WeakMap, WeakSet, Buffer, Math, JSON, Intl]`
-*user* | `[push, pop, shift, unshift, in, nin, eq, ne, gt, gte, lt, lte, not, or, and, add, sub, div, mul, mod, get, set, nvl, uvl, pairs, flatten, unflatten, pick]`
-*value* | Any value[method]; eg `[toLowerCase, join, split]`
+Last but not least; invoke value[key](...args) if function otherwise return value.
 
 # Examples
 ```graphql

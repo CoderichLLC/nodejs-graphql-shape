@@ -206,7 +206,7 @@ module.exports = class GraphQLShape {
       return functions[fn](value, firstUserArg, ...args);
     }
 
-    if (value?.[fn]) {
+    if (typeof value?.[fn] === 'function') {
       if (firstUserArg === null) return value[fn](...args);
       return value[fn](firstUserArg, ...args);
     }
