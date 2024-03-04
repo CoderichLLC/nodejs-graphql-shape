@@ -157,12 +157,21 @@ describe('GraphQLShape', () => {
       expect(GraphQLShape.transform({ obj: { lever: 'd', name: 'name' } }, transforms)).toEqual({ obj: { lever: 'd', name: 'd' } });
     });
 
-    test('set', () => {
+    test('new Set()', () => {
       const transforms = [{
         key: 'arr',
         ops: [{ Set: 'new' }, { Array: 'from' }, { sort: null }],
       }];
       expect(GraphQLShape.transform({ arr: [1, 2, 1, 5, 4, 3, 2, 1, 1, 5] }, transforms)).toEqual({ arr: [1, 2, 3, 4, 5] });
+    });
+
+    test('push|concat', () => {
+      const push = [{ key: 'arr', ops: [{ push: 1 }] }];
+      const pushs = [{ key: 'arr', ops: [{ push: [1, 2, 3] }] }];
+      const concat = [{ key: 'arr', ops: [{ concat: [1, 2, 3] }] }];
+      expect(GraphQLShape.transform({ arr: [] }, push)).toEqual({ arr: [1] });
+      expect(GraphQLShape.transform({ arr: [] }, pushs)).toEqual({ arr: [1, 2, 3] });
+      expect(GraphQLShape.transform({ arr: [] }, concat)).toEqual({ arr: [1, 2, 3] });
     });
 
     test('assign', () => {

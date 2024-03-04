@@ -31,7 +31,7 @@ annotation | description | .parse()
 `@_shape` | Define/Transform a **non-existing** field in the GraphQL Schema | The *field* is removed from the *query*
 
 ### Transformations (annotation arguments)
-Transformations are performed via annotation arguments where each *key:value* pair maps a transformation *name:args* pair
+Transformations are performed via annotation arguments where each *key:value* pair maps to a transformation *name:arg* function call:
 * Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
 * Each transformation assigns it's return value to the annotated field (mutating it)
 * Each transformation receives the current field value as it's first argument
@@ -45,7 +45,7 @@ GraphQLShape.define(Map); // { name: function, name: function, ... }
 
 ### API
 
-Each transformation falls into 1 of the following lookup tables that are referenced (in order of preference):
+Each transformation falls into 1 of the following lookup tables (referenced in order of preference):
 
 #### Lib
 Baseline transformations. Cannot be re-defined.
@@ -72,10 +72,10 @@ key | value | type | description | example
 Useful set of transformations. **Can** be re-defined.
 key | value | type | description
 --- | --- | --- | ---
-`push` | JSONPath | String, Array | Select from the current field
-`pop` | JSONPath | String, Array | Select from the field's parent
-`shift` | JSONPath | String, Array | Select from the root object
-`unshift` | Transform | Object, AoO | Iterate field value(s) and apply transformation(s) to each
+`push` | Any | String, Array | Alias for `Array.concat`
+`pop` | null | null | `Array.pop`; return array
+`shift` | null | null | `Array.shift`; return array
+`unshift` | Any | String, Array | `Array.unshift`; return array
 `in` | Value | Any | Assign a value to the field
 `nin` | Key | String | Rename the field key
 `eq` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
@@ -102,7 +102,7 @@ key | value | type | description
 `pick` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
 
 #### Value
-Last but not least; invoke value[key](...args) if function otherwise return value.
+Lastly, invoke value.key(...args) if function; otherwise return value.
 
 # Examples
 ```graphql
