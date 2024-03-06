@@ -36,7 +36,7 @@ Transformations are performed via annotation arguments where each *key:value* pa
 * Each transformation assigns it's return value to the annotated field (mutating it)
 * Each transformation receives the current field value as it's first argument
 
-### Learn By Example
+### Transformations (by example)
 ```graphql
 query {
   books @shape(self: "edges[*].node") {
@@ -104,14 +104,14 @@ name | arg | description
 --- | --- | ---
 `push` | Value(s) | Push value(s); return array
 `unshift` | Value(s) | Unshift value(s); return array
-`in` | Values | Boolean: if value in values
-`nin` | Values | Boolean: if value **not** in values
-`eq` | {array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
-`ne` | {array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
-`gt` | {array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
-`gte` | {array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
-`lt` | {array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
-`lte` |{array} [if, then, else] | Hoist all field attributes to the parent and optionally delete field
+`in` | Value(s) | Boolean: if value in values
+`nin` | Value(s) | Boolean: if value **not** in values
+`eq` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value === v#**; else **v?**
+`ne` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value !== v#**; else **v?**
+`gt` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value > v#**; else **v?**
+`gte` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value >= v#**; else **v?**
+`lt` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value < v#**; else **v?**
+`lte` | [v1, r1, v2, r2, ..., v?] | Return first **r#** if **value <= v#**; else **v?**
 `not` | null | Negate value
 `or` | Value(s) | Boolean: if **any** value.concat(values) is truthy
 `and` | Value(s) | Boolean: if **all** value.concat(values) are truthy
@@ -125,13 +125,13 @@ name | arg | description
 `nvl` | Value(s) | Return *first* **! === null** value from [value, ...values]
 `uvl` | Value(s) | Return *first* **! === undefined** value from [value, ...values]
 `default` | Value(s) | Return *first* **! == null** value from [value, ...values]
-`pick` | Keep? | Boolean | Hoist all field attributes to the parent and optionally delete field
+`pick` | Key(s) | Pick only the key(s) you want from the field/object
 `pairs` | null | Transform flat array to 2D elements of 2 (pair) length
-`flatten` | * | Flatten object
-`unflatten` | * | Unflatten object
+`flatten` | * | Flat.flatten like
+`unflatten` | * | Flat.unflatten like
 
 #### Value
-Lastly, invoke `value.key(...args)` if function; otherwise return value (noop).
+Lastly, invoke `value.key(...args)` if function; otherwise return *value* (noop).
 
 ### Extension
 You may `define` (or redefine) a *user* transformation via:
