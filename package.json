@@ -1,8 +1,12 @@
 {
   "name": "@coderich/graphql-shape",
   "description": "Transform GraphQL response data to desired shape",
-  "keywords": ["GraphQL", "transform", "shape"],
-  "version": "2.2.2",
+  "keywords": [
+    "GraphQL",
+    "transform",
+    "shape"
+  ],
+  "version": "2.2.3",
   "author": "coderich",
   "main": "src/GraphQLShape.js",
   "publishConfig": {
