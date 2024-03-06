@@ -1,3 +1,4 @@
+const { inspect } = require('util');
 const Util = require('@coderich/util');
 const cloneDeep = require('lodash.clonedeep');
 const GraphQLShape = require('../src/GraphQLShape');
@@ -251,6 +252,61 @@ describe('GraphQLShape', () => {
       expect(transform({ inherit: true, designation: 'poi' })).toEqual({ inherit: 'Inherit', designation: 'poi' });
       expect(transform({ inherit: false, designation: 'poi' })).toEqual({ inherit: 'Override', designation: 'poi' });
       expect(transform({ inherit: false, designation: 'site' })).toEqual({ inherit: '', designation: 'site' });
+    });
+
+    test('nested fragments', () => {
+      const { transform } = GraphQLShape.parse(`
+        fragment one on ONE {
+          one @shape(toUpperCase: null)
+          once @shape(toLowerCase: null)
+        }
+        fragment two on TWO {
+          two @shape(ucFirst: null)
+          twice
+        }
+        fragment duo on DUO {
+          ...one
+          ...two
+        }
+        query {
+          data {
+            ...one
+            three
+            combo {
+              ...duo
+              thrice
+            }
+          }
+        }
+      `);
+
+      expect(transform({
+        data: {
+          one: 'one',
+          once: 'ONCE',
+          three: 'three',
+          combo: {
+            one: 'one',
+            once: 'onCe',
+            two: 'two',
+            twice: 'twice',
+            thrice: 'thrice',
+          },
+        },
+      })).toEqual({
+        data: {
+          one: 'ONE',
+          once: 'once',
+          three: 'three',
+          combo: {
+            one: 'ONE',
+            once: 'once',
+            two: 'Two',
+            twice: 'twice',
+            thrice: 'thrice',
+          },
+        },
+      });
     });
 
     test('fixture', () => {

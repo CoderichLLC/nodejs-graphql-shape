@@ -18,7 +18,9 @@ module.exports = class GraphQLShape {
     const transforms = [];
     const fragments = {};
     const deleteNodes = new WeakMap();
-    let target = transforms, isFragment = false, counter = 0, field;
+    let target = transforms, isFragment = false, field;
+    transforms.$counter = 0;
+    fragments.$counter = 0;
 
     // Parse out directives while building transforms
     const query = print(visit(ast, {
@@ -33,8 +35,9 @@ module.exports = class GraphQLShape {
             break;
           }
           case Kind.FRAGMENT_SPREAD: {
-            const $paths = [...paths];
-            const start = transforms.length;
+            const $paths = [...isFragment ? fpaths : paths];
+            const start = target.length;
+            const $target = target;
 
             thunks.push(() => {
               const fragment = fragments[name];
@@ -42,8 +45,8 @@ module.exports = class GraphQLShape {
                 const key = $paths.concat(obj.key.split('.')).join('.');
                 return { ...obj, key };
               });
-              transforms.splice(start + counter, 0, ...additions);
-              counter += additions.length;
+              $target.splice(start + $target.$counter, 0, ...additions);
+              $target.$counter += additions.length;
             });
             break;
           }
@@ -103,6 +106,10 @@ module.exports = class GraphQLShape {
 
     // Finalizations due to unpredictable order for AST
     thunks.forEach(thunk => thunk());
+
+    // Cleanup
+    delete transforms.$counter;
+    delete fragments.$counter;
 
     return {
       query,
