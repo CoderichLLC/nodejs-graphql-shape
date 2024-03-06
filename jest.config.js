@@ -9,4 +9,5 @@ module.exports = {
   // globalSetup: '<rootDir>/test/jest.global.setup.js',
   // setupFilesAfterEnv: ['<rootDir>/test/jest.setup.js'],
   testMatch: ['<rootDir>/test/**/?(*.)+(spec|test).[jt]s?(x)'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.js)$)'], // This line tells Jest to transform all .js files in node_modules
 };

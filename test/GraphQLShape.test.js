@@ -1,4 +1,3 @@
-const { inspect } = require('util');
 const Util = require('@coderich/util');
 const cloneDeep = require('lodash.clonedeep');
 const GraphQLShape = require('../src/GraphQLShape');

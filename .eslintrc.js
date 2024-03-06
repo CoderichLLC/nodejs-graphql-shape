@@ -3,7 +3,7 @@ module.exports = {
   env: { jest: true },
   extends: 'airbnb-base',
   parserOptions: {
-    ecmaVersion: 2020,
+    ecmaVersion: 2023,
   },
   settings: {
     'import/core-modules': [
