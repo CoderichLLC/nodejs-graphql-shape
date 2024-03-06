@@ -6,7 +6,7 @@
     "transform",
     "shape"
   ],
-  "version": "2.2.5",
+  "version": "2.2.6",
   "author": "coderich",
   "main": "src/GraphQLShape.js",
   "publishConfig": {
