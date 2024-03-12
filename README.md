@@ -6,8 +6,6 @@ Shape the response of your GraphQL queries, **declaratively!**
 
 This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
 
-It includes [JSONPath+](https://www.npmjs.com/package/jsonpath-plus) to help select and transform data to it's required shape!
-
 ---
 
 ### Usage
