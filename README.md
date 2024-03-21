@@ -123,6 +123,7 @@ name | arg | description
 `nvl` | Value(s) | Return *first* **! === null** value from [value, ...values]
 `uvl` | Value(s) | Return *first* **! === undefined** value from [value, ...values]
 `default` | Value(s) | Return *first* **! == null** value from [value, ...values]
+`filter` | RegExp | Filter an array of values that match a given RegExp
 `pick` | Key(s) | Pick only the key(s) you want from the field/object
 `pairs` | null | Transform flat array to 2D elements of 2 (pair) length
 `flatten` | * | Flat.flatten like

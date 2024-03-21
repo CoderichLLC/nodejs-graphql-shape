@@ -43,13 +43,14 @@ exports.mul = (v, ...args) => args.flat().reduce((prev, curr) => prev * Number(c
 exports.mod = (v, ...args) => args.flat().reduce((prev, curr) => prev % Number(curr), Number(v));
 
 // Utility methods
-exports.get = get;
-exports.set = Util.set;
-exports.nvl = Util.nvl;
-exports.uvl = Util.uvl;
-exports.pairs = Util.pairs;
-exports.flatten = Util.flatten;
-exports.unflatten = Util.unflatten;
+exports.get = (...args) => get(...args);
+exports.set = (...args) => Util.set(...args);
+exports.nvl = (...args) => Util.nvl(...args);
+exports.uvl = (...args) => Util.uvl(...args);
+exports.pairs = (...args) => Util.pairs(...args);
+exports.flatten = (...args) => Util.flatten(...args);
+exports.unflatten = (...args) => Util.unflatten(...args);
+exports.filter = (v, re) => v.filter(el => el.match(Util.parseRegExp(re)));
 exports.default = (v, ...args) => Util.ensureArray(v).concat(args.flat()).find(el => el != null);
 
 // Pick keys (with optional rename)
