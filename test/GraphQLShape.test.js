@@ -253,6 +253,43 @@ describe('GraphQLShape', () => {
       expect(transform({ inherit: false, designation: 'site' })).toEqual({ inherit: '', designation: 'site' });
     });
 
+    test('formatted key substitution variable', () => {
+      const input = {
+        hours: {
+          type: 'none',
+          custom: [{
+            day: 'monday',
+            status: 'open',
+            hours: [
+              { startTime: '00:00', endTime: '10:10' },
+            ],
+          }],
+        },
+      };
+
+      const { transform } = GraphQLShape.parse(`
+        query {
+          hours @shape(self: "type", eq: ["custom", "$0", "$1"] get: ["custom", "$1"]) {
+            type
+            custom @shape(self: "$[*].formatted", join: "\\n") {
+              formatted @_shape(parent: "$[day,status,hours]", join: " ", trim: "")
+              day
+              status
+              hours @shape(map: [{ Object: "values" }, { join: " " }, { trim: "" }], join: " | ") {
+                startTime
+                endTime
+              }
+            }
+          }
+        }
+      `);
+
+      expect(transform(cloneDeep(input))).toEqual({ hours: 'none' });
+      const $input = cloneDeep(input);
+      $input.hours.type = 'custom';
+      expect(transform($input)).toEqual({ hours: 'monday open 00:00 10:10' });
+    });
+
     test('nested fragments', () => {
       const { transform } = GraphQLShape.parse(`
         fragment one on ONE {
