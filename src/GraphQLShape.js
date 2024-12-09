@@ -52,10 +52,10 @@ module.exports = class GraphQLShape {
           }
           case Kind.DIRECTIVE: {
             if ([options.name, `_${options.name}`].includes(name)) {
+              if (name === `_${options.name}`) deleteNodes.set(field.name, false);
               const ops = node.arguments.map((arg) => {
                 const key = arg.name.value;
                 const value = GraphQLShape.#resolveNodeValue(arg.value);
-                if (name === `_${options.name}`) deleteNodes.set(field.name, false);
                 return { [key]: value };
               }).filter(Boolean);
 

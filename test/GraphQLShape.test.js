@@ -69,9 +69,15 @@ describe('GraphQLShape', () => {
         { key: 'base', ops: [{ pick: [{ attr1: 'attr' }, 'attr3'] }] },
       ])).toEqual({ base: { attr: 'one', attr3: 'three' } });
 
+      // Via array (assumed also the rename key)
       expect(GraphQLShape.transform({ obj: [1, 2, 3, 4] }, [
         { key: 'obj', ops: [{ pick: [2] }] },
       ])).toEqual({ obj: { 2: 3 } });
+
+      // Ensure nothing strange happens here...
+      expect(GraphQLShape.transform({ obj: { id: 1, type: 'red' } }, [
+        { key: 'obj', ops: [{ pick: ['id', 'type'] }] },
+      ])).toEqual({ obj: { id: 1, type: 'red' } });
     });
 
     test('array manipulation', () => {
@@ -82,10 +88,9 @@ describe('GraphQLShape', () => {
           { type: 'website', data: { url: { en: 'google' } } },
         ],
       }, [
-        { key: 'phone', ops: [{ parent: 'arrObj[?(@.type=="phone")].data.phone' }, { self: '$[0]' }] },
-        { key: 'website', ops: [{ parent: 'arrObj[?(@.type=="website")].data.url.en' }, { self: '$[0]' }] },
+        { key: 'phone', ops: [{ parent: 'arrObj[?(@.type==="phone")].data.phone' }, { self: '$[0]' }] },
+        { key: 'website', ops: [{ parent: 'arrObj[?(@.type==="website")].data.url.en' }, { self: '$[0]' }] },
         { key: '', ops: [{ pick: ['phone', 'website'] }] },
-
       ])).toEqual({ phone: '973', website: 'google' });
     });
 
@@ -267,12 +272,15 @@ describe('GraphQLShape', () => {
         },
       };
 
-      const { transform } = GraphQLShape.parse(`
+      const { query, transform } = GraphQLShape.parse(`
         query {
           hours @shape(self: "type", eq: ["custom", "$0", "$1"] get: ["custom", "$1"]) {
             type
             custom @shape(self: "$[*].formatted", join: "\\n") {
               formatted @_shape(parent: "$[day,status,hours]", join: " ", trim: "")
+              report @_shape {
+                id @_shape
+              }
               day
               status
               hours @shape(map: [{ Object: "values" }, { join: " " }, { trim: "" }], join: " | ") {
@@ -284,6 +292,19 @@ describe('GraphQLShape', () => {
         }
       `);
 
+      expect(query).toEqual(`{
+  hours {
+    type
+    custom {
+      day
+      status
+      hours {
+        startTime
+        endTime
+      }
+    }
+  }
+}`);
       expect(transform(cloneDeep(input))).toEqual({ hours: 'none' });
       const $input = cloneDeep(input);
       $input.hours.type = 'custom';
