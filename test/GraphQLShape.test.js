@@ -272,15 +272,12 @@ describe('GraphQLShape', () => {
         },
       };
 
-      const { query, transform } = GraphQLShape.parse(`
+      const { transform } = GraphQLShape.parse(`
         query {
           hours @shape(self: "type", eq: ["custom", "$0", "$1"] get: ["custom", "$1"]) {
             type
             custom @shape(self: "$[*].formatted", join: "\\n") {
               formatted @_shape(parent: "$[day,status,hours]", join: " ", trim: "")
-              report @_shape {
-                id @_shape
-              }
               day
               status
               hours @shape(map: [{ Object: "values" }, { join: " " }, { trim: "" }], join: " | ") {
@@ -292,23 +289,27 @@ describe('GraphQLShape', () => {
         }
       `);
 
-      expect(query).toEqual(`{
-  hours {
-    type
-    custom {
-      day
-      status
-      hours {
-        startTime
-        endTime
-      }
-    }
-  }
-}`);
       expect(transform(cloneDeep(input))).toEqual({ hours: 'none' });
       const $input = cloneDeep(input);
       $input.hours.type = 'custom';
       expect(transform($input)).toEqual({ hours: 'monday open 00:00 10:10' });
+    });
+
+    test('Fully ephemeral attributes', () => {
+      const input = { type: 'basic', report: {} };
+      const { query, transform } = GraphQLShape.parse(`
+        query {
+          type
+          report @_shape {
+            type @_shape(root: "type")
+          }
+        }
+      `);
+
+      expect(query).toEqual(`{
+  type
+}`);
+      expect(transform(cloneDeep(input))).toEqual({ type: 'basic', report: { type: 'basic' } });
     });
 
     test('nested fragments', () => {
