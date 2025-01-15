@@ -80,6 +80,12 @@ describe('GraphQLShape', () => {
       ])).toEqual({ obj: { id: 1, type: 'red' } });
     });
 
+    test('uvl', () => {
+      expect(GraphQLShape.transform({ mutations: [{ diff: [1] }] }, [
+        { key: 'mutations', ops: [{ root: 'mutations[?(@.diff.length===0)]' }, { uvl: [[]] }] },
+      ])).toEqual({ mutations: [] });
+    });
+
     test('array manipulation', () => {
       expect(GraphQLShape.transform({
         arrObj: [
@@ -222,6 +228,15 @@ describe('GraphQLShape', () => {
         }
       `);
       expect(transform({ attr1: 'a', attr2: 'b' })).toEqual({ attr1: 'a', attr2: 'a' });
+    });
+
+    test('uvl', () => {
+      const { transform } = GraphQLShape.parse(`
+        query {
+          unchanged @_shape(root: "mutations[?(@.diff.length===0)]", uvl: [[]])
+        }
+      `);
+      expect(transform({})).toEqual({ unchanged: [] });
     });
 
     test('transformation rollup', () => {
