@@ -47,7 +47,7 @@ describe('GraphQLShape', () => {
 
     test('core methods', () => {
       expect(GraphQLShape.transform({ attr1: 'one', attr2: 'two', attr3: 'three' }, [
-        { key: 'attr1', ops: [{ Boolean: null }] },
+        { key: 'attr1', ops: [{ Boolean: [] }] },
         { key: 'attr2', ops: [{ Date: 'now' }] },
         { key: 'attr3', ops: [{ Date: 'new' }] },
       ])).toEqual({ attr1: true, attr2: expect.any(Number), attr3: expect.any(Date) });
@@ -171,7 +171,7 @@ describe('GraphQLShape', () => {
     test('new Set()', () => {
       const transforms = [{
         key: 'arr',
-        ops: [{ Set: 'new' }, { Array: 'from' }, { sort: null }],
+        ops: [{ Set: 'new' }, { Array: 'from' }, { sort: [] }],
       }];
       expect(GraphQLShape.transform({ arr: [1, 2, 1, 5, 4, 3, 2, 1, 1, 5] }, transforms)).toEqual({ arr: [1, 2, 3, 4, 5] });
     });
@@ -330,11 +330,11 @@ describe('GraphQLShape', () => {
     test('nested fragments', () => {
       const { transform } = GraphQLShape.parse(`
         fragment one on ONE {
-          one @shape(toUpperCase: null)
-          once @shape(toLowerCase: null)
+          one @shape(toUpperCase: [])
+          once @shape(toLowerCase: [])
         }
         fragment two on TWO {
-          two @shape(ucFirst: null)
+          two @shape(ucFirst: [])
           twice
         }
         fragment duo on DUO {
