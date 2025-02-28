@@ -192,7 +192,9 @@ module.exports = class GraphQLShape {
   static #resolveVariableArgs(vars, args) {
     return Util.map(args, (arg) => {
       const match = `${arg}`.match(/\$(\d)/);
-      return match ? vars[match[1]] : arg;
+      if (!match) return arg;
+      const value = vars[match[1]];
+      return Array.isArray(arg) ? [value] : value;
     });
   }
 
@@ -230,7 +232,7 @@ module.exports = class GraphQLShape {
       case 'EnumValueDefinition': return node.name.value;
       case 'EnumTypeDefinition': return node.values.map(GraphQLShape.#resolveNodeValue);
       case 'ObjectValue': return node.fields.reduce((prev, field) => Object.assign(prev, { [field.name.value]: GraphQLShape.#resolveNodeValue(field.value) }), {});
-      default: return node.value ?? node;
+      default: return node.value === 'undefined' ? undefined : (node.value ?? node);
     }
   }
 };
