@@ -21,12 +21,12 @@ Object.entries({
   lte: (v, value) => v <= value,
 }).forEach(([key, fn]) => {
   exports[key] = (v, ...args) => {
-    return Util.uvl(Util.pairs(args).reduce((prev, [value, result], i) => {
+    return Util.pairs(args).reduce((prev, [value, result], i) => {
       if (prev !== undefined) return prev;
       if (result === undefined) return i > 0 ? value : fn(v, value);
       if (fn(v, value)) return result;
       return undefined;
-    }, undefined), v);
+    }, undefined);
   };
 });
 
