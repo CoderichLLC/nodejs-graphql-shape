@@ -21,9 +21,10 @@ Object.entries({
   lte: (v, value) => v <= value,
 }).forEach(([key, fn]) => {
   exports[key] = (v, ...args) => {
-    return Util.pairs(args).reduce((prev, [value, result], i) => {
-      if (prev !== undefined) return prev;
-      if (result === undefined) return i > 0 ? value : fn(v, value);
+    return Util.pairs(args).reduce((prev, pair, i) => {
+      const [value, result] = pair;
+      if (prev !== undefined) return prev; // Found a result
+      if (pair.length < 2) return i > 0 ? value : fn(v, value); // Optional fallback/else value
       if (fn(v, value)) return result;
       return undefined;
     }, undefined);
@@ -59,5 +60,5 @@ exports.pick = (v, ...args) => args.reduce((prev, mixed) => {
   if (Array.isArray(mixed)) [key, $key] = mixed;
   else if (typeof mixed === 'object') [[key, $key]] = Object.entries(mixed);
   else key = $key = mixed;
-  return Object.assign(prev, { [$key]: v[key] });
+  return Object.assign(prev, { [$key]: exports.get(v, key) });
 }, {});
