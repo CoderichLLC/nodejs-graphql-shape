@@ -1,4 +1,4 @@
-const get = require('lodash.get');
+const Get = require('lodash.get');
 const Util = require('@coderich/util');
 
 // Array methods
@@ -44,21 +44,20 @@ exports.mul = (v, ...args) => args.flat().reduce((prev, curr) => prev * Number(c
 exports.mod = (v, ...args) => args.flat().reduce((prev, curr) => prev % Number(curr), Number(v));
 
 // Utility methods
-exports.get = (...args) => get(...args);
+exports.get = (...args) => Get(...args);
 exports.set = (...args) => Util.set(...args);
 exports.nvl = (...args) => Util.nvl(...args);
 exports.uvl = (...args) => Util.uvl(...args);
 exports.pairs = (...args) => Util.pairs(...args);
 exports.flatten = (...args) => Util.flatten(...args);
 exports.unflatten = (...args) => Util.unflatten(...args);
-exports.filter = (v, re) => v.filter(el => el.match(Util.parseRegExp(re)));
+exports.filter = (v, re) => v.filter(el => el?.match?.(Util.parseRegExp(re)));
 exports.default = (v, ...args) => Util.ensureArray(v).concat(args.flat()).find(el => el != null);
 
 // Pick keys (with optional rename)
 exports.pick = (v, ...args) => args.reduce((prev, mixed) => {
-  let key, $key;
+  let key, $key = key = mixed;
   if (Array.isArray(mixed)) [key, $key] = mixed;
   else if (typeof mixed === 'object') [[key, $key]] = Object.entries(mixed);
-  else key = $key = mixed;
   return Object.assign(prev, { [$key]: exports.get(v, key) });
 }, {});

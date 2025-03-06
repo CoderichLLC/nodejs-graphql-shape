@@ -4,8 +4,6 @@
 
 Shape the response of your GraphQL queries, **declaratively!**
 
-This project explores the concept of *Query & Transformation Collocation* in **GraphQL**.
-
 ---
 
 ### Usage
@@ -30,7 +28,7 @@ annotation | description | .parse()
 
 ### Transformations (annotation arguments)
 Transformations are performed via annotation arguments where each *key:value* pair maps to a transformation *name:args* function call:
-* Transformations are evaluated depth-first (inside-out, bottom-up) and from left-to-right
+* Transformations are evaluated depth-first, from left-to-right, and in natural order
 * Each transformation assigns it's return value to the annotated field (mutating it)
 * Each transformation receives the current field value as it's first argument
 

@@ -1,3 +1,4 @@
+const Get = require('lodash.get');
 const Util = require('@coderich/util');
 const { JSONPath } = require('jsonpath-plus');
 const { Kind, visit, parse, print } = require('graphql');
@@ -12,6 +13,7 @@ module.exports = class GraphQLShape {
   static parse(ast, options = {}) {
     if (typeof ast === 'string') ast = parse(ast);
     options.name ??= 'shape';
+    const schema = {};
     const thunks = [];
     const paths = [];
     const fpaths = [];
@@ -53,21 +55,27 @@ module.exports = class GraphQLShape {
           case Kind.DIRECTIVE: {
             if ([options.name, `_${options.name}`].includes(name)) {
               if (name === `_${options.name}`) deleteNodes.set(field.name, false);
+
               const ops = node.arguments.map((arg) => {
-                const key = arg.name.value;
+                const k = arg.name.value;
                 const value = GraphQLShape.#resolveNodeValue(arg.value);
-                return { [key]: value };
+                return { [k]: value };
               }).filter(Boolean);
 
               const $paths = isFragment ? fpaths : paths;
-              target.push({ key: $paths.join('.'), ops });
+              const key = $paths.join('.');
+              schema[key] = ops.reduce((prev, curr) => Object.assign(prev, curr), {});
+              target.push({ key, ops });
             }
+
             break;
           }
           case Kind.FIELD: {
             const key = alias ?? name;
             if (isFragment) fpaths.push(key);
             else paths.push(key);
+            const $paths = isFragment ? fpaths : paths;
+            schema[$paths.join('.')] = {};
             field = node;
             break;
           }
@@ -111,10 +119,20 @@ module.exports = class GraphQLShape {
     delete transforms.$counter;
     delete fragments.$counter;
 
+    // Depth-first but preserves the parent/root order
+    transforms.sort((a, b) => {
+      if (a.key === '') return 1;
+      if (b.key === '') return -1;
+      if (a.key.startsWith(b.key) && a.key.length > b.key.length) return -1;
+      if (b.key.startsWith(a.key) && b.key.length > a.key.length) return 1;
+      return 0;
+    });
+
     return {
       query,
+      schema,
       fragments,
-      transforms: transforms.reverse(), // We must reverse the order since we do depth-first traversal
+      transforms,
       transform: data => GraphQLShape.transform(data, transforms),
     };
   }
@@ -136,7 +154,8 @@ module.exports = class GraphQLShape {
               const json = [value, info.parent, data][['self', 'parent', 'root'].indexOf(fn)];
 
               try {
-                value = Util.isPlainObjectOrArray(json) ? JSONPath({ path: mixed, json, wrap: false }) : json;
+                const path = GraphQLShape.#resolveVariableArgs(vars, mixed);
+                value = Util.isPlainObjectOrArray(json) ? JSONPath({ path, json, wrap: false }) : json;
               } catch (e) {
                 e.data = { json, mixed };
                 throw e;
@@ -157,8 +176,20 @@ module.exports = class GraphQLShape {
             }
             case 'rename': {
               thunks.push(() => {
-                info.parent[GraphQLShape.#resolveVariableArgs(vars, mixed)] = value;
-                delete info.parent[info.key];
+                const args = GraphQLShape.#resolveVariableArgs(vars, mixed);
+
+                if (typeof args === 'string') { // Rename the parent element itself
+                  info.parent[args] = value;
+                  delete info.parent[info.key];
+                } else { // Rename parent keys (like "pick" but keep everything else)
+                  const pairs = Array.isArray(args) ? args : Object.entries(args);
+                  Util.map(value, (v) => {
+                    pairs.forEach(([k, $k]) => {
+                      Util.set(v, $k, Get(v, k));
+                      delete v[k];
+                    });
+                  });
+                }
               });
               break;
             }
@@ -182,7 +213,7 @@ module.exports = class GraphQLShape {
         return value;
       });
 
-      // Deferred processing
+      // Deferred processing (because we set the "value" back to the object line: 213)
       thunks.forEach(thunk => thunk());
     });
 
@@ -193,7 +224,8 @@ module.exports = class GraphQLShape {
     return Util.map(args, (arg) => {
       const match = `${arg}`.match(/\$(\d)/);
       if (!match) return arg;
-      const value = vars[match[1]];
+      const key = match[1];
+      const value = vars[key];
       return Array.isArray(arg) ? [value] : value;
     });
   }

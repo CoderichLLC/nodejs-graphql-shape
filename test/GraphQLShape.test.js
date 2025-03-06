@@ -242,11 +242,7 @@ describe('GraphQLShape', () => {
     test('transformation rollup', () => {
       const { transform } = GraphQLShape.parse(`
         query @shape(self: "id") {
-          id @shape(parent: "books", map: [{ unshift: "$0" }, { join: ":" }])
-          books @shape(map: { Object: values }) {
-            price
-            author
-          }
+          id @shape(parent: "books", map: { Object: values }, map: [{ unshift: "$0" }, { join: ":" }])
         }
       `);
 
@@ -290,15 +286,9 @@ describe('GraphQLShape', () => {
       const { transform } = GraphQLShape.parse(`
         query {
           hours @shape(self: "type", eq: ["custom", "$0", "$1"] get: ["custom", "$1"]) {
-            type
             custom @shape(self: "$[*].formatted", join: "\\n") {
+              hours @shape(map: [{ Object: "values" }, { join: " " }, { trim: "" }], join: " | ")
               formatted @_shape(parent: "$[day,status,hours]", join: " ", trim: "")
-              day
-              status
-              hours @shape(map: [{ Object: "values" }, { join: " " }, { trim: "" }], join: " | ") {
-                startTime
-                endTime
-              }
             }
           }
         }
@@ -390,13 +380,13 @@ describe('GraphQLShape', () => {
       expect(transforms).toEqual([
         { key: 'result1.cats', ops: [{ self: '$[*].name' }, { map: { ucFirst: '' } }, { join: ', ' }] },
         { key: 'result1.str', ops: [{ split: ',' }, { map: [{ toUpperCase: '' }] }, { slice: [0, -1] }] },
-        { key: 'result1.edges', ops: [{ self: '$[*].node' }] },
-        { key: 'result1.edges.node.location', ops: [{ self: 'address' }] },
         { key: 'result1.edges.node.location.address.state', ops: [{ map: { toUpperCase: '' } }] },
-        { key: 'result2', ops: [{ self: 'edges[*].node.location' }] },
+        { key: 'result1.edges.node.location', ops: [{ self: 'address' }] },
+        { key: 'result1.edges', ops: [{ self: '$[*].node' }] },
         { key: 'result2.arrObj', ops: [{ self: '$[*].name' }, { join: ', ' }] },
         { key: 'result2.edges.node.location.address.state', ops: [{ map: { toUpperCase: '' } }] },
-      ].reverse());
+        { key: 'result2', ops: [{ self: 'edges[*].node.location' }] },
+      ]);
 
       // Not normalized
       expect(fragments).toEqual({
@@ -446,6 +436,17 @@ describe('GraphQLShape', () => {
             },
           },
         ],
+      });
+    });
+
+    test('schema', () => {
+      expect(GraphQLShape.parse(`{
+        root @shape(name: "NP") @ignored(name: "ABC") {
+          id @shape(name: "ID", name: "UID")
+        }
+      }`).schema).toEqual({
+        root: { name: 'NP' },
+        'root.id': { name: 'UID' },
       });
     });
   });
