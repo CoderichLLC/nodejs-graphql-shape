@@ -1,13 +1,9 @@
 {
-  "name": "@coderich/graphql-shape",
-  "description": "Transform GraphQL response data to desired shape",
-  "keywords": [
-    "GraphQL",
-    "transform",
-    "shape"
-  ],
   "version": "3.0.0",
   "author": "coderich",
+  "name": "@coderich/graphql-shape",
+  "description": "Transform data using GraphQL",
+  "keywords": ["GraphQL", "transform", "shape"],
   "main": "src/GraphQLShape.js",
   "publishConfig": {
     "access": "public"
@@ -22,12 +18,12 @@
     "dev": "coderich-dev"
   },
   "dependencies": {
-    "@coderich/util": "1.2.2",
+    "@coderich/util": "2.1.3",
     "jsonpath-plus": "^10.3.0",
     "lodash.get": "4.4.2"
   },
   "devDependencies": {
-    "@coderich/dev": "^0.3.3",
+    "@coderich/dev": "0.5.3",
     "graphql": "16.8.1",
     "lodash.clonedeep": "4.5.0"
   },

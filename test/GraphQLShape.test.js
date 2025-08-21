@@ -441,11 +441,11 @@ describe('GraphQLShape', () => {
 
     test('schema', () => {
       expect(GraphQLShape.parse(`{
-        root @shape(name: "NP") @ignored(name: "ABC") {
+        root @shape(name: "NP", nonsense: "poopypants") @ignored(name: "ABC") {
           id @shape(name: "ID", name: "UID")
         }
       }`).schema).toEqual({
-        root: { name: 'NP' },
+        root: { name: 'NP', nonsense: 'poopypants' },
         'root.id': { name: 'UID' },
       });
     });

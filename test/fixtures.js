@@ -1,6 +1,6 @@
 module.exports = {
   request: `
-    query {
+    mutation bulkUpsert {
       result1: findIt {
         id
         arr
@@ -42,7 +42,7 @@ module.exports = {
     }
   `,
   $request: `
-    {
+    mutation bulkUpsert {
       result1: findIt {
         id
         arr

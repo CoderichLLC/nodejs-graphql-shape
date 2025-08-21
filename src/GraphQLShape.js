@@ -222,7 +222,7 @@ module.exports = class GraphQLShape {
 
   static #resolveVariableArgs(vars, args) {
     return Util.map(args, (arg) => {
-      const match = `${arg}`.match(/\$(\d)/);
+      const match = `${arg}`.match(/\$(\d+)/);
       if (!match) return arg;
       const key = match[1];
       const value = vars[key];
