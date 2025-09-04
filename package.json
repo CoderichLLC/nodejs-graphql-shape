@@ -1,9 +1,13 @@
 {
-  "version": "3.0.0",
+  "version": "4.0.0",
   "author": "coderich",
   "name": "@coderich/graphql-shape",
   "description": "Transform data using GraphQL",
-  "keywords": ["GraphQL", "transform", "shape"],
+  "keywords": [
+    "GraphQL",
+    "transform",
+    "shape"
+  ],
   "main": "src/GraphQLShape.js",
   "publishConfig": {
     "access": "public"
