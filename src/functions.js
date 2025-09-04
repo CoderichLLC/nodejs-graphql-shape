@@ -53,9 +53,11 @@ exports.flatten = (...args) => Util.flatten(...args);
 exports.unflatten = (...args) => Util.unflatten(...args);
 exports.filter = (v, re) => v.filter(el => el?.match?.(Util.parseRegExp(re)));
 exports.default = (v, ...args) => Util.ensureArray(v).concat(args.flat()).find(el => el != null);
+exports.delete = (v, ...args) => { args.forEach(arg => delete v?.[arg]); return v; };
 
 // Pick keys (with optional rename)
 exports.pick = (v, ...args) => args.reduce((prev, mixed) => {
+  if (v == null) return v;
   let key, $key = key = mixed;
   if (Array.isArray(mixed)) [key, $key] = mixed;
   else if (typeof mixed === 'object') [[key, $key]] = Object.entries(mixed);
